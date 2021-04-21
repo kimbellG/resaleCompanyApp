@@ -6,10 +6,6 @@ import (
 	"net/http"
 )
 
-type Env struct {
-	Reg Registrar
-}
-
 type Registrar interface {
 	RegisterUser(userInfo *models.RegistrationInformation) error
 }

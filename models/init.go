@@ -6,16 +6,26 @@ import (
 
 	"database/sql"
 
+	neasted "github.com/antonfisher/nested-logrus-formatter"
 	_ "github.com/jackc/pgx/stdlib"
 	"github.com/joho/godotenv"
+	"github.com/sirupsen/logrus"
 )
 
 type DBController struct {
 	*sql.DB
 }
 
+var logger *logrus.Logger
+
 func init() {
+	logger = logrus.New()
+	logger.SetFormatter(&neasted.Formatter{
+		HideKeys: true,
+	})
+	logger.SetLevel(logrus.DebugLevel)
 	initEnv()
+
 }
 
 func initEnv() {
