@@ -53,12 +53,24 @@ func CreateNewDBConnection() *DBController {
 }
 
 func (db *DBController) createTables() {
+	DBLogger := logger.WithFields(logrus.Fields{"action": "CreateDBTable"})
+
 	if err := db.createUserInfoTable(); err != nil {
 		log.Fatalln("create user information table:", err)
 	}
 
 	if err := db.createAuthInfoTable(); err != nil {
 		log.Fatalln("create authtorization information table:", err)
+	}
+
+	if err := db.createRegionTable(); err != nil {
+		DBLogger.Error("Invalid region table")
+		os.Exit(1)
+	}
+
+	if err := db.createProviderTable(); err != nil {
+		DBLogger.Error("Invalid provider table: ", err)
+		os.Exit(1)
 	}
 }
 
@@ -80,8 +92,36 @@ func (db *DBController) createAuthInfoTable() error {
  		login	 VARCHAR(30), 
  		password VARCHAR(30),
  		status	 INTEGER,
-		userInfo INTEGER REFERENCES UserInformation (id)
+		userInfo INTEGER REFERENCES UserInformation (id) ON DELETE CASCADE
 	);`)
+
+	return err
+}
+
+func (db *DBController) createProviderTable() error {
+	err := db.createTable(
+		`CREATE TABLE IF NOT EXISTS Provider (
+			vendor_code SERIAL PRIMARY KEY UNIQUE,
+			name VARCHAR(200) NOT NULL,
+			unp CHAR(9) NOT NULL,
+			region_code INTEGER,
+			terms_of_payment VARCHAR(100),
+			FOREIGN KEY (region_code) REFERENCES Region (id)
+	);`)
+
+	return err
+}
+
+func (db *DBController) createRegionTable() error {
+	err := db.createTable(
+		`CREATE TABLE IF NOT EXISTS Region (
+			id SERIAL PRIMARY KEY UNIQUE,
+			country VARCHAR(100) NOT NULL,
+			city VARCHAR(100) NOT NULL,
+			address VARCHAR(100) NOT NULL,
+			phone_number CHAR(14) CHECK(char_length(phone_number) = 14),
+			email VARCHAR(100)
+		);`)
 
 	return err
 }
