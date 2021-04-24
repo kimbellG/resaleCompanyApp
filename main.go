@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"net/http"
 	"os"
 
@@ -40,7 +39,6 @@ func main() {
 	}
 
 	log.Info(port)
-	fmt.Println(port)
 
 	err := http.ListenAndServe(":"+port, router)
 
