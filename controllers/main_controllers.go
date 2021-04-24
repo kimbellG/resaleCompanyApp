@@ -8,6 +8,7 @@ import (
 type Env struct {
 	Reg      Registrar
 	UserAuth Auth
+	Prov     Provider
 }
 
 func TestingToken(w http.ResponseWriter, r *http.Request) {

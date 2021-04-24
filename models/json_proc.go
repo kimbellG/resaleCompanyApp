@@ -25,8 +25,8 @@ func DecodingPasswordAuthInfo(r *http.Request) (*PasswordAutheficationInfo, erro
 	return result, nil
 }
 
-func DecodingProvider(r *http.Request) (*ProviderJSON, error) {
-	result := &ProviderJSON{}
+func DecodingProvider(r *http.Request) (*Provider, error) {
+	result := &Provider{}
 
 	if err := json.NewDecoder(r.Body).Decode(result); err != nil {
 		return nil, err

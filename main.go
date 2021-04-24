@@ -22,23 +22,23 @@ func init() {
 
 func main() {
 
-	router := mux.NewRouter()
-	db := models.CreateNewDBConnection()
-	env := &controllers.Env{db, db}
-
-	router.HandleFunc("/", controllers.TestingToken)
-	router.HandleFunc("/register", env.RegistrationHandler)
-	router.HandleFunc("/login", env.PasswordAuthentification)
-
-	router.Use(app.JWTAuthentication)
-	router.Use(app.LogNewConnection)
-
 	port := os.Getenv("PORT")
+	log.Info(port)
 	if port == "" {
 		port = "8000"
 	}
 
-	log.Info(port)
+	router := mux.NewRouter()
+	db := models.CreateNewDBConnection()
+	env := &controllers.Env{db, db, db}
+
+	router.HandleFunc("/", controllers.TestingToken)
+	router.HandleFunc("/register", env.RegistrationHandler)
+	router.HandleFunc("/login", env.PasswordAuthentification)
+	router.HandleFunc("/provider/create", env.CreateProviderController)
+
+	router.Use(app.JWTAuthentication)
+	router.Use(app.LogNewConnection)
 
 	err := http.ListenAndServe(":"+port, router)
 

@@ -63,11 +63,6 @@ func (db *DBController) createTables() {
 		log.Fatalln("create authtorization information table:", err)
 	}
 
-	if err := db.createRegionTable(); err != nil {
-		DBLogger.Error("Invalid region table")
-		os.Exit(1)
-	}
-
 	if err := db.createProviderTable(); err != nil {
 		DBLogger.Error("Invalid provider table: ", err)
 		os.Exit(1)
@@ -88,12 +83,12 @@ func (db *DBController) createUserInfoTable() error {
 func (db *DBController) createAuthInfoTable() error {
 	err := db.createTable(
 		`CREATE TABLE IF NOT EXISTS AuthtorizationInformation (
- 		id 		 SERIAL PRIMARY KEY UNIQUE,
- 		login	 VARCHAR(30), 
- 		password VARCHAR(30),
- 		status	 INTEGER,
-		userInfo INTEGER REFERENCES UserInformation (id) ON DELETE CASCADE
-	);`)
+			id 		 SERIAL PRIMARY KEY UNIQUE,
+ 			login	 VARCHAR(30), 
+ 			password VARCHAR(30),
+ 			status	 INTEGER,
+			userInfo INTEGER REFERENCES UserInformation (id) ON DELETE CASCADE
+		);`)
 
 	return err
 }
@@ -101,27 +96,15 @@ func (db *DBController) createAuthInfoTable() error {
 func (db *DBController) createProviderTable() error {
 	err := db.createTable(
 		`CREATE TABLE IF NOT EXISTS Provider (
-			vendor_code SERIAL PRIMARY KEY UNIQUE,
-			name VARCHAR(200) NOT NULL,
-			unp CHAR(9) NOT NULL,
-			region_code INTEGER,
+			vendor_code		 SERIAL PRIMARY KEY UNIQUE,
+			name			 VARCHAR(200) NOT NULL,
+			unp				 CHAR(9) NOT NULL,
 			terms_of_payment VARCHAR(100),
-			FOREIGN KEY (region_code) REFERENCES Region (id)
+			address			 VARCHAR(200) NOT NULL,
+			phone_number	 CHAR(14) CHECK(char_length(phone_number) = 13),
+			email			 VARCHAR(100),
+			web_site		 VARCHAR(100)
 	);`)
-
-	return err
-}
-
-func (db *DBController) createRegionTable() error {
-	err := db.createTable(
-		`CREATE TABLE IF NOT EXISTS Region (
-			id SERIAL PRIMARY KEY UNIQUE,
-			country VARCHAR(100) NOT NULL,
-			city VARCHAR(100) NOT NULL,
-			address VARCHAR(100) NOT NULL,
-			phone_number CHAR(14) CHECK(char_length(phone_number) = 14),
-			email VARCHAR(100)
-		);`)
 
 	return err
 }
