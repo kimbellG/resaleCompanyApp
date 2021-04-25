@@ -32,7 +32,7 @@ func (db *DBController) GetUserInfo(logpass *PasswordAutheficationInfo) (*Author
 
 	for userAuthInfo.Next() {
 		if err := userAuthInfo.Scan(&result.Login, &result.Password, &result.Status, &result.AccessProfile, &result.UserInfoId); err != nil {
-			DBLog.Error(fmt.Sprintf("Error with scan from query: %v"), err)
+			DBLog.Error(fmt.Sprintf("Error with scan from query: %v", err))
 			os.Exit(1)
 		}
 	}

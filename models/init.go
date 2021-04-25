@@ -99,7 +99,7 @@ func (db *DBController) createProviderTable() error {
 		`CREATE TABLE IF NOT EXISTS Provider (
 			vendor_code		 SERIAL PRIMARY KEY UNIQUE,
 			name			 VARCHAR(200) NOT NULL,
-			unp				 CHAR(9) NOT NULL,
+			unp				 VARCHAR(10) NOT NULL CHECK(char_length(unp) = 9),
 			terms_of_payment VARCHAR(100),
 			address			 VARCHAR(200) NOT NULL,
 			phone_number	 CHAR(14) CHECK(char_length(phone_number) = 13),
