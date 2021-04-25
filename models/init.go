@@ -84,9 +84,10 @@ func (db *DBController) createAuthInfoTable() error {
 	err := db.createTable(
 		`CREATE TABLE IF NOT EXISTS AuthtorizationInformation (
 			id 		 SERIAL PRIMARY KEY UNIQUE,
- 			login	 VARCHAR(30), 
- 			password VARCHAR(30),
+ 			login	 VARCHAR(30) NOT NULL UNIQUE, 
+ 			password VARCHAR(30) NOT NULL,
  			status	 INTEGER,
+			AccessProfile VARCHAR(100) NOT NULL,
 			userInfo INTEGER REFERENCES UserInformation (id) ON DELETE CASCADE
 		);`)
 

@@ -24,14 +24,14 @@ func (env *Env) PasswordAuthentification(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	PassAuthLog.Debug(fmt.Sprintf("Connecting new user: %v", logPass.Login))
-
 	userInfo, err := env.UserAuth.GetUserInfo(logPass)
 	if err != nil {
 		PassAuthLog.Debug(fmt.Sprintf("%v", err))
 		http.Error(w, fmt.Sprintf("%v", err), http.StatusForbidden)
 		return
 	}
+
+	PassAuthLog.Debug(fmt.Sprintf("Connecting new user: %v:%v", userInfo.Login, userInfo.AccessProfile))
 
 	tokens := userInfo.GenerateToken()
 	w, err = tokens.EncodingTokensInHttpBody(w)

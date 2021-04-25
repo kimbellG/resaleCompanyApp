@@ -38,6 +38,7 @@ func main() {
 	router.HandleFunc("/provider/create", env.CreateProviderController)
 
 	router.Use(app.JWTAuthentication)
+	router.Use(app.CheckAccessRight)
 	router.Use(app.LogNewConnection)
 
 	err := http.ListenAndServe(":"+port, router)

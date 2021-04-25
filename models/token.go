@@ -16,15 +16,15 @@ type TokenAnswer struct {
 }
 
 type TokenInfo struct {
-	Login     string
-	Sec       time.Time
-	TypeToken byte
+	AccessProfile string
+	Sec           time.Time
+	TypeToken     byte
 	jwt.StandardClaims
 }
 
 func (user *AuthorizationUserInformation) GenerateToken() *TokenAnswer {
-	tkClaimsCurrent := &TokenInfo{Login: user.Login, Sec: time.Now().Add(time.Hour), TypeToken: 'c'}
-	tkClaimsRefresh := &TokenInfo{Login: user.Login, Sec: time.Now().Add(time.Hour * 24 * 30), TypeToken: 'r'}
+	tkClaimsCurrent := &TokenInfo{AccessProfile: user.AccessProfile, Sec: time.Now().Add(time.Hour), TypeToken: 'c'}
+	tkClaimsRefresh := &TokenInfo{AccessProfile: user.AccessProfile, Sec: time.Now().Add(time.Hour * 24 * 30), TypeToken: 'r'}
 
 	return &TokenAnswer{tkClaimsCurrent.GenerateToken(), tkClaimsRefresh.GenerateToken()}
 }

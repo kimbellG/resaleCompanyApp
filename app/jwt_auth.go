@@ -3,17 +3,20 @@ package app
 import (
 	"context"
 	"cw/models"
+	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
 	"strings"
 
 	jwt "github.com/dgrijalva/jwt-go"
+	"github.com/pkg/errors"
 )
 
 var JWTAuthentication = func(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if isNoAuthPath(r.URL.Path) {
+		if isPublicPath(r.URL.Path) {
 			next.ServeHTTP(w, r)
 			return
 		}
@@ -30,13 +33,13 @@ var JWTAuthentication = func(next http.Handler) http.Handler {
 			return
 		}
 
-		ctx := context.WithValue(r.Context(), "user", tokenInfo.Login)
+		ctx := context.WithValue(r.Context(), "AccessProfile", tokenInfo.AccessProfile)
 		r = r.WithContext(ctx)
 		next.ServeHTTP(w, r)
 	})
 }
 
-func isNoAuthPath(path string) bool {
+func isPublicPath(path string) bool {
 	for _, noAuthPath := range []string{"/login", "/register", "/refresh_token"} {
 		if path == noAuthPath {
 			return true
@@ -95,8 +98,8 @@ func isInvalidFormatOfToken(headerWord []string) bool {
 
 var LogNewConnection = func(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if !isNoAuthPath(r.URL.Path) {
-			user := r.Context().Value("user")
+		if !isPublicPath(r.URL.Path) {
+			user := r.Context().Value("AccessProfile")
 			log.Printf("Connection user: %v", user)
 			next.ServeHTTP(w, r)
 		} else {
@@ -104,4 +107,60 @@ var LogNewConnection = func(next http.Handler) http.Handler {
 		}
 	})
 
+}
+
+var CheckAccessRight = func(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if isPublicPath(r.URL.Path) {
+			log.Println("is public path: don't check access right")
+			next.ServeHTTP(w, r)
+			return
+		}
+
+		accessRight, err := readAccessRightFromFile()
+		if err != nil {
+			log.Fatalf("error: read access right from file: %v", err)
+		}
+
+		AccessProfile := r.Context().Value("AccessProfile")
+		AccessPaths, ok := accessRight[fmt.Sprintf("%v", AccessProfile)]
+		if !ok {
+			log.Println("Incorrect access profile:", AccessProfile)
+			http.Error(w, "Incorrect access profile", http.StatusForbidden)
+			return
+		}
+
+		if err := checkURLPATH(AccessPaths, r.URL.Path); err != nil {
+			log.Println(r.URL.Path, ":", err)
+			http.Error(w, fmt.Sprint(err), http.StatusForbidden)
+			return
+		}
+
+		next.ServeHTTP(w, r)
+	})
+}
+
+func readAccessRightFromFile() (map[string][]string, error) {
+	accessRight := map[string][]string{}
+	file, err := os.Open("access_right.json")
+	if err != nil {
+		return nil, errors.Errorf("file access doesn't open")
+	}
+	defer file.Close()
+
+	if err := json.NewDecoder(file).Decode(&accessRight); err != nil {
+		return nil, errors.Errorf("invalid json format")
+	}
+
+	return accessRight, nil
+}
+
+func checkURLPATH(AccessPaths []string, URLPath string) error {
+	for _, path := range AccessPaths {
+		if URLPath == path {
+			return nil
+		}
+	}
+
+	return errors.New("resource is not available")
 }

@@ -8,10 +8,11 @@ type RegistrationInformation struct {
 }
 
 type AuthorizationUserInformation struct {
-	Login      string
-	Password   string
-	Status     int
-	UserInfoId int64 `json:"user_info_id"`
+	Login         string
+	Password      string
+	Status        int
+	AccessProfile string
+	UserInfoId    int64 `json:"user_info_id"`
 }
 
 const (
@@ -45,12 +46,12 @@ func (db *DBController) RegisterUser(userInfo *RegistrationInformation) error {
 }
 
 func (db *DBController) AddAuthRecord(authInfo *AuthorizationUserInformation) error {
-	stmt, err := db.Prepare("INSERT INTO authtorizationinformation (login, password, status, userinfo) VALUES ($1, $2, $3, $4)")
+	stmt, err := db.Prepare("INSERT INTO authtorizationinformation (login, password, status, AccessProfile, userinfo) VALUES ($1, $2, $3, $4, $5)")
 	if err != nil {
 		return err
 	}
 
-	if _, err := stmt.Exec(authInfo.Login, authInfo.Password, authInfo.Status, authInfo.UserInfoId); err != nil {
+	if _, err := stmt.Exec(authInfo.Login, authInfo.Password, authInfo.Status, authInfo.AccessProfile, authInfo.UserInfoId); err != nil {
 		return err
 	}
 

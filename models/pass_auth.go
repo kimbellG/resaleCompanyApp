@@ -16,7 +16,7 @@ func (db *DBController) GetUserInfo(logpass *PasswordAutheficationInfo) (*Author
 	DBLog := logger.WithFields(log.Fields{"action": "PasswordAuthtorization", "func": "GetUserFromDB"})
 
 	result := &AuthorizationUserInformation{}
-	stmt, err := db.Prepare("SELECT login, password, status, userinfo FROM authtorizationinformation WHERE login = $1 AND password = $2")
+	stmt, err := db.Prepare("SELECT login, password, status, accessprofile, userinfo FROM authtorizationinformation WHERE login = $1 AND password = $2")
 	if err != nil {
 		DBLog.Error("Invalid stmt to db")
 		os.Exit(1)
@@ -31,7 +31,7 @@ func (db *DBController) GetUserInfo(logpass *PasswordAutheficationInfo) (*Author
 	defer userAuthInfo.Close()
 
 	for userAuthInfo.Next() {
-		if err := userAuthInfo.Scan(&result.Login, &result.Password, &result.Status, &result.UserInfoId); err != nil {
+		if err := userAuthInfo.Scan(&result.Login, &result.Password, &result.Status, &result.AccessProfile, &result.UserInfoId); err != nil {
 			DBLog.Error(fmt.Sprintf("Error with scan from query: %v"), err)
 			os.Exit(1)
 		}
@@ -39,6 +39,10 @@ func (db *DBController) GetUserInfo(logpass *PasswordAutheficationInfo) (*Author
 
 	if result.Login == "" {
 		return nil, errors.New("Authorization failed. User doesn't exist.")
+	}
+
+	if result.Status == 0 {
+		return nil, errors.New("Profile is not affected")
 	}
 
 	return result, nil
