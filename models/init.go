@@ -81,15 +81,6 @@ func (db *DBController) createUserInfoTable() error {
 }
 
 func (db *DBController) createAuthInfoTable() error {
-	err := db.createTable(
-		`CREATE TABLE IF NOT EXISTS AuthtorizationInformation (
-			id 		 SERIAL PRIMARY KEY UNIQUE,
- 			login	 VARCHAR(30) NOT NULL UNIQUE, 
- 			password VARCHAR(30) NOT NULL,
- 			status	 INTEGER,
-			AccessProfile VARCHAR(100) NOT NULL,
-			userInfo INTEGER REFERENCES UserInformation (id) ON DELETE CASCADE
-		);`)
 
 	return err
 }
@@ -108,18 +99,4 @@ func (db *DBController) createProviderTable() error {
 	);`)
 
 	return err
-}
-
-func (db *DBController) createTable(query string) error {
-	stmt, err := db.Prepare(query)
-
-	if err != nil {
-		return err
-	}
-
-	if _, err := stmt.Exec(); err != nil {
-		return err
-	}
-
-	return nil
 }
