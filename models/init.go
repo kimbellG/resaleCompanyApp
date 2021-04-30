@@ -2,7 +2,6 @@ package models
 
 import (
 	"log"
-	"os"
 
 	"database/sql"
 
@@ -35,68 +34,46 @@ func initEnv() {
 	}
 }
 
-func CreateNewDBConnection() *DBController {
-	lib_db, err := sql.Open("pgx", os.Getenv("DATABASE_URL"))
-	if err != nil {
-		panic(err)
-	}
+// func (db *DBController) createTables() {
+// 	DBLogger := logger.WithFields(logrus.Fields{"action": "CreateDBTable"})
 
-	db := &DBController{lib_db}
+// 	if err := db.createUserInfoTable(); err != nil {
+// 		log.Fatalln("create user information table:", err)
+// 	}
 
-	if err := db.Ping(); err != nil {
-		panic(err)
-	}
+// 	if err := db.createAuthInfoTable(); err != nil {
+// 		log.Fatalln("create authtorization information table:", err)
+// 	}
 
-	db.createTables()
+// 	if err := db.createProviderTable(); err != nil {
+// 		DBLogger.Error("Invalid provider table: ", err)
+// 		os.Exit(1)
+// 	}
+// }
 
-	return db
-}
+// func (db *DBController) createUserInfoTable() error {
+// 	err := db.createTable(
+// 		`CREATE TABLE IF NOT EXISTS UserInformation (
+// 			id 		SERIAL PRIMARY KEY,
+// 			surname VARCHAR(50) NOT NULL,
+// 			name 	VARCHAR(50) NOT NULL
+// 		);`)
 
-func (db *DBController) createTables() {
-	DBLogger := logger.WithFields(logrus.Fields{"action": "CreateDBTable"})
+// 	return err
+// }
 
-	if err := db.createUserInfoTable(); err != nil {
-		log.Fatalln("create user information table:", err)
-	}
+// func (db *DBController) createProviderTable() error {
+// 	err := db.createTable(
+// 		`CREATE TABLE IF NOT EXISTS Provider (
+// 			vendor_code		 SERIAL PRIMARY KEY UNIQUE,
+// 			name			 VARCHAR(200) NOT NULL,
+// 			unp				 VARCHAR(10) NOT NULL CHECK(char_length(unp) = 9),
+// 			terms_of_payment VARCHAR(100),
+// 			address			 VARCHAR(200) NOT NULL,
+// 			phone_number	 CHAR(14) CHECK(char_length(phone_number) = 13),
+// 			email			 VARCHAR(100),
+// 			web_site		 VARCHAR(100)
+// 	);`)
 
-	if err := db.createAuthInfoTable(); err != nil {
-		log.Fatalln("create authtorization information table:", err)
-	}
-
-	if err := db.createProviderTable(); err != nil {
-		DBLogger.Error("Invalid provider table: ", err)
-		os.Exit(1)
-	}
-}
-
-func (db *DBController) createUserInfoTable() error {
-	err := db.createTable(
-		`CREATE TABLE IF NOT EXISTS UserInformation (
-			id 		SERIAL PRIMARY KEY,
-			surname VARCHAR(50) NOT NULL,
-			name 	VARCHAR(50) NOT NULL
-		);`)
-
-	return err
-}
-
-func (db *DBController) createAuthInfoTable() error {
-
-	return err
-}
-
-func (db *DBController) createProviderTable() error {
-	err := db.createTable(
-		`CREATE TABLE IF NOT EXISTS Provider (
-			vendor_code		 SERIAL PRIMARY KEY UNIQUE,
-			name			 VARCHAR(200) NOT NULL,
-			unp				 VARCHAR(10) NOT NULL CHECK(char_length(unp) = 9),
-			terms_of_payment VARCHAR(100),
-			address			 VARCHAR(200) NOT NULL,
-			phone_number	 CHAR(14) CHECK(char_length(phone_number) = 13),
-			email			 VARCHAR(100),
-			web_site		 VARCHAR(100)
-	);`)
-
-	return err
-}
+// 	return err
+// }

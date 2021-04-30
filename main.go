@@ -1,50 +1,33 @@
 package main
 
 import (
-	"net/http"
+	"cw/logger"
+	"cw/server"
+	"log"
 	"os"
 
-	"cw/app"
-	"cw/controllers"
-	"cw/models"
-
-	neasted "github.com/antonfisher/nested-logrus-formatter"
-	"github.com/gorilla/mux"
-	log "github.com/sirupsen/logrus"
+	"github.com/joho/godotenv"
 )
 
 func init() {
-	log.SetFormatter(&neasted.Formatter{
-		HideKeys: true,
-	})
-	log.SetOutput(os.Stdout)
+	err := godotenv.Load()
+	if err != nil {
+		log.Println(err)
+	}
+
 }
 
 func main() {
+	mainLogger := logger.NewLoggerWithFields(
+		map[string]interface{}{"action": "start server"})
 
 	port := os.Getenv("PORT")
-	log.Info(port)
 	if port == "" {
 		port = "8000"
 	}
 
-	router := mux.NewRouter()
-	db := models.CreateNewDBConnection()
-	env := &controllers.Env{db, db, db}
+	mainLogger.Infof("port: %v", port)
 
-	router.HandleFunc("/", controllers.TestingToken)
-	router.HandleFunc("/register", env.RegistrationHandler)
-	router.HandleFunc("/login", env.PasswordAuthentification)
-	router.HandleFunc("/provider/create", env.CreateProviderController)
-
-	router.Use(app.JWTAuthentication)
-	router.Use(app.CheckAccessRight)
-	router.Use(app.LogNewConnection)
-
-	err := http.ListenAndServe(":"+port, router)
-
-	if err != nil {
-		log.Fatalln(err)
-	}
-
+	app := server.NewApp()
+	app.Run(port)
 }

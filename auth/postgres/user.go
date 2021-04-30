@@ -52,7 +52,7 @@ func NewUserRepository(db *sql.DB) *UserRepository {
 	id 		 SERIAL PRIMARY KEY UNIQUE,
  	login	 VARCHAR(30) NOT NULL UNIQUE, 
  	password VARCHAR(30) NOT NULL,
- 	status	 INTEGER,
+ 	status	 BOOLEAN,
 	access	 VARCHAR(100) NOT NULL,
 	name	 VARCHAR(200) NOT NULL
 );`)

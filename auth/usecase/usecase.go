@@ -7,29 +7,28 @@ import (
 	"cw/models"
 	"errors"
 	"fmt"
-	"os"
 
 	jwt "github.com/dgrijalva/jwt-go"
 )
 
 type AuthUseCase struct {
-	userRepo *auth.UserRepository
+	userRepo auth.UserRepository
 	tokenKey []byte
 }
 
-func NewAuthUseCase(rep *auth.UserRepository) *AuthUseCase {
+func NewAuthUseCase(rep auth.UserRepository, passwordKey []byte) *AuthUseCase {
 	return &AuthUseCase{
 		userRepo: rep,
-		tokenKey: []byte(os.Getenv("KEYPASSWORD")),
+		tokenKey: passwordKey,
 	}
 }
 
-func (a *AuthUseCase) SignUp(ctx context.Context, username, password, name, access string) error {
-	new_user := models.User{
+func (a *AuthUseCase) SignUp(ctx context.Context, username, password, name string) error {
+	new_user := &models.User{
 		Login:    username,
 		Password: password,
 		Name:     name,
-		Access:   access,
+		Access:   "",
 		Status:   false,
 	}
 
@@ -49,13 +48,8 @@ func (a *AuthUseCase) SignIn(ctx context.Context, username, password string) (st
 	return a.GenerateToken(user), nil
 }
 
-type TokenInfo struct {
-	AccessProfile string
-	jwt.StandardClaims
-}
-
-func NewTokenInfo(user *models.User) *TokenInfo {
-	return &TokenInfo{
+func NewTokenInfo(user *models.User) *models.TokenInfo {
+	return &models.TokenInfo{
 		AccessProfile:  user.Access,
 		StandardClaims: jwt.StandardClaims{},
 	}
