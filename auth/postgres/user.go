@@ -47,7 +47,7 @@ type UserRepository struct {
 }
 
 func NewUserRepository(db *sql.DB) *UserRepository {
-	err := db.createTable(
+	err := createTable(db,
 		`CREATE TABLE IF NOT EXISTS userInformation (
 	id 		 SERIAL PRIMARY KEY UNIQUE,
  	login	 VARCHAR(30) NOT NULL UNIQUE, 
@@ -107,11 +107,11 @@ func (r *UserRepository) addAuthRecord(user *User) error {
 
 func (r *UserRepository) GetUser(ctx context.Context, username, password string) (*models.User, error) {
 	dbUser := r.requestUserToDB(username, password)
-	if dbUser == "" {
+	if dbUser.Login == "" {
 		return nil, errors.New("Authorization failed. User doesn't exist.")
 	}
 
-	return dbUser, nil
+	return PostgresToModels(dbUser), nil
 }
 
 func (r *UserRepository) requestUserToDB(username, password string) *User {
@@ -123,7 +123,7 @@ func (r *UserRepository) requestUserToDB(username, password string) *User {
 		logger.AssertMessage(fields, fmt.Sprintf("stmt is invalid: %v", err))
 	}
 
-	userAuthInfo, err := stmt.Query(logpass.Login, logpass.Password)
+	userAuthInfo, err := stmt.Query(username, password)
 	if err != nil {
 		logger.AssertMessage(fields, fmt.Sprintf("query is invalid: %v", err))
 	}

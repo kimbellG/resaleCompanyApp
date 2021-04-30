@@ -14,6 +14,10 @@ import (
 	"github.com/pkg/errors"
 )
 
+type access string
+
+const accessProfile = access("access")
+
 var JWTAuthentication = func(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if isPublicPath(r.URL.Path) {
@@ -33,7 +37,7 @@ var JWTAuthentication = func(next http.Handler) http.Handler {
 			return
 		}
 
-		ctx := context.WithValue(r.Context(), "AccessProfile", tokenInfo.AccessProfile)
+		ctx := context.WithValue(r.Context(), accessProfile, tokenInfo.AccessProfile)
 		r = r.WithContext(ctx)
 		next.ServeHTTP(w, r)
 	})
@@ -99,7 +103,7 @@ func isInvalidFormatOfToken(headerWord []string) bool {
 var LogNewConnection = func(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if !isPublicPath(r.URL.Path) {
-			user := r.Context().Value("AccessProfile")
+			user := r.Context().Value(accessProfile)
 			log.Printf("Connection user: %v", user)
 			next.ServeHTTP(w, r)
 		} else {
@@ -122,7 +126,7 @@ var CheckAccessRight = func(next http.Handler) http.Handler {
 			log.Fatalf("error: read access right from file: %v", err)
 		}
 
-		AccessProfile := r.Context().Value("AccessProfile")
+		AccessProfile := r.Context().Value(accessProfile)
 		AccessPaths, ok := accessRight[fmt.Sprintf("%v", AccessProfile)]
 		if !ok {
 			log.Println("Incorrect access profile:", AccessProfile)
