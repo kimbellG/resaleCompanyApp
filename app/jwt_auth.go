@@ -44,7 +44,7 @@ var JWTAuthentication = func(next http.Handler) http.Handler {
 }
 
 func isPublicPath(path string) bool {
-	for _, noAuthPath := range []string{"/sign-up", "/register", "/refresh_token"} {
+	for _, noAuthPath := range []string{"/sign-up", "/sign-in"} {
 		if path == noAuthPath {
 			return true
 		}

@@ -10,4 +10,5 @@ func RegisterEndpoints(router *mux.Router, uc auth.UseCase) {
 	h := NewHandler(uc)
 
 	router.HandleFunc("/sign-up", h.SignUp)
+	router.HandleFunc("/sign-in", h.SignIn)
 }
