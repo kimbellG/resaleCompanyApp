@@ -14,6 +14,11 @@ import (
 	"cw/auth/postgres"
 	"cw/auth/usecase"
 
+	"cw/provider"
+	provider_dlvr "cw/provider/delivery"
+	prv_rep "cw/provider/postgres"
+	prv_usecase "cw/provider/usecase"
+
 	"cw/app"
 
 	"github.com/gorilla/mux"
@@ -22,17 +27,20 @@ import (
 
 type App struct {
 	authController auth.UseCase
+	provider       provider.UseCase
 }
 
 func NewApp() *App {
 	db := initDB()
 
 	userRepo := postgres.NewUserRepository(db)
+	providerRepo := prv_rep.NewProviderRepository(db)
 
 	return &App{
 		authController: usecase.NewAuthUseCase(
 			userRepo,
 			[]byte(os.Getenv("KEYPASSWORD"))),
+		provider: prv_usecase.NewProviderUseCase(providerRepo),
 	}
 }
 
@@ -53,6 +61,7 @@ func (a *App) Run(port string) {
 	router := mux.NewRouter()
 
 	auth_delivery.RegisterEndpoints(router, a.authController)
+	provider_dlvr.RegisterEndpoints(router, a.provider)
 
 	router.Use(app.JWTAuthentication)
 	router.Use(app.CheckAccessRight)
