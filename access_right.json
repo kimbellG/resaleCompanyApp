@@ -1,0 +1,8 @@
+{
+    "test": [
+        "/provider/add",
+        "/provider/get",
+        "/provider/update",
+        "/provider/delete"
+    ]
+}
