@@ -94,6 +94,10 @@ func (h *Handler) Gets(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
+	} else {
+		getLogger.Debug("incorrect url form")
+		http.Error(w, "incorrect url form", http.StatusBadRequest)
+		return
 	}
 
 	if err := encodingInBody(&w, resultPrv); err != nil {
@@ -146,7 +150,7 @@ func (h *Handler) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := h.useCase.UpdateCost(r.Context(), fields.Product, fields.Provider, fields.Cost); err != nil {
+	if err := h.useCase.UpdateCost(r.Context(), fields.Provider, fields.Product, fields.Cost); err != nil {
 		updateLogger.Debug(err)
 		http.Error(w, "Invalid update request", http.StatusBadRequest)
 		return

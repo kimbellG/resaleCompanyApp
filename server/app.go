@@ -29,6 +29,11 @@ import (
 	prdrep "cw/product/postgres"
 	prduse "cw/product/usecase"
 
+	"cw/prdtoffer"
+	offerdlvr "cw/prdtoffer/delivery"
+	offerrep "cw/prdtoffer/postgres"
+	offercase "cw/prdtoffer/usecase"
+
 	"cw/app"
 
 	"github.com/gorilla/mux"
@@ -40,6 +45,7 @@ type App struct {
 	provider       provider.UseCase
 	clt            client.UseCase
 	prd            product.UseCase
+	offer          prdtoffer.UseCase
 }
 
 func NewApp() *App {
@@ -49,6 +55,7 @@ func NewApp() *App {
 	providerRepo := prv_rep.NewProviderRepository(db)
 	cltRepo := client_rep.NewClientRepository(db)
 	prdRepo := prdrep.NewProductRepository(db)
+	offerRepo := offerrep.NewOfferRepository(db)
 
 	return &App{
 		authController: usecase.NewAuthUseCase(
@@ -57,6 +64,7 @@ func NewApp() *App {
 		provider: prv_usecase.NewProviderUseCase(providerRepo),
 		clt:      client_usecase.NewClientUseCase(cltRepo),
 		prd:      prduse.NewProductUseCase(prdRepo),
+		offer:    offercase.NewProductOfferUseCase(offerRepo, providerRepo, prdRepo),
 	}
 }
 
@@ -67,7 +75,7 @@ func initDB() *sql.DB {
 	}
 
 	if err := lib_db.Ping(); err != nil {
-		panic(fmt.Errorf("Pinging db is failed: %v", err))
+		panic(fmt.Errorf("pinging db is failed: %v", err))
 	}
 
 	return lib_db
@@ -80,6 +88,7 @@ func (a *App) Run(port string) {
 	provider_dlvr.RegisterEndpoints(router, a.provider)
 	client_dlvr.RegisterEndpoints(router, a.clt)
 	prddlvr.RegisterEndpoints(router, a.prd)
+	offerdlvr.RegisterEndpoints(router, a.offer)
 
 	router.Use(app.JWTAuthentication)
 	router.Use(app.CheckAccessRight)

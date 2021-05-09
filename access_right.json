@@ -13,6 +13,10 @@
         "/product/get",
         "/product/update",
         "/product/delete",
-        "/product/filter"
+        "/product/filter",
+        "/offer/add",
+        "/offer/get",
+        "/offer/update",
+        "/offer/delete"
     ]
 }

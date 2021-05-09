@@ -30,6 +30,7 @@ func (o *ProductOfferUseCase) Add(ctx context.Context, pr *prdtoffer.Offer) erro
 	if err := o.feelProductId(ctx, pr.ProductName, newOffer); err != nil {
 		return err
 	}
+	newOffer.Cost = pr.Cost
 
 	if err := o.rep.Add(ctx, newOffer); err != nil {
 		return err
@@ -104,7 +105,7 @@ func (o *ProductOfferUseCase) modToOffer(mod models.Offer) (*prdtoffer.Offer, er
 	return result, nil
 }
 
-func (o *ProductOfferUseCase) GetOfferOfProvider(ctx context.Context, providerName string) ([]prdtoffer.Offer, error) {
+func (o *ProductOfferUseCase) GetOffersOfProvider(ctx context.Context, providerName string) ([]prdtoffer.Offer, error) {
 	providerId, err := o.prov.GetIDByName(ctx, providerName)
 	if err != nil {
 		return nil, fmt.Errorf("incorrect provider name: %v", err)
@@ -124,7 +125,7 @@ func (o *ProductOfferUseCase) UpdateCost(ctx context.Context, providerName, prod
 		return fmt.Errorf("incorrect provider name: %v", err)
 	}
 
-	productId, err := o.prov.GetIDByName(ctx, productName)
+	productId, err := o.prod.GetIDByName(ctx, productName)
 	if err != nil {
 		return fmt.Errorf("incorrect product name: %v", err)
 	}

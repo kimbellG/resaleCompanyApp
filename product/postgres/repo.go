@@ -171,7 +171,7 @@ func (r *ProductRepository) GetIDByName(ctx context.Context, name string) (int, 
 }
 
 func (r *ProductRepository) GetNameById(id int) (string, error) {
-	stmt, err := r.db.Prepare("SELECT id FROM Product WHERE name = $1")
+	stmt, err := r.db.Prepare("SELECT name FROM Product WHERE id = $1")
 	if err != nil {
 		return "", fmt.Errorf("prepare stmt: %v", err)
 	}

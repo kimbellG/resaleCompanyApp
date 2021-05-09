@@ -117,7 +117,7 @@ func (pr *ProviderRepository) DeleteAll() error {
 }
 
 func (r *ProviderRepository) GetIDByName(ctx context.Context, name string) (int, error) {
-	stmt, err := r.db.Prepare("SELECT id FROM Provider WHERE name = $1")
+	stmt, err := r.db.Prepare("SELECT vendor_code FROM Provider WHERE name = $1")
 	if err != nil {
 		return -1, fmt.Errorf("prepare stmt: %v", err)
 	}
@@ -142,7 +142,7 @@ func (r *ProviderRepository) GetIDByName(ctx context.Context, name string) (int,
 }
 
 func (r *ProviderRepository) GetNameById(id int) (string, error) {
-	stmt, err := r.db.Prepare("SELECT id FROM Provider WHERE name = $1")
+	stmt, err := r.db.Prepare("SELECT name FROM Provider WHERE vendor_code = $1")
 	if err != nil {
 		return "", fmt.Errorf("prepare stmt: %v", err)
 	}
