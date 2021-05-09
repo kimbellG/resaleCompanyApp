@@ -11,6 +11,7 @@ type User struct {
 }
 
 type TokenInfo struct {
+	Login         string
 	AccessProfile string
 	jwt.StandardClaims
 }

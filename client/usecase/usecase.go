@@ -30,7 +30,7 @@ func prToModels(pr *client.Client) *models.Client {
 		Id:          pr.Id,
 		Name:        pr.Name,
 		FIO:         pr.FIO,
-		PhoneNumber: pr.PhoneNumber,
+		PhoneNumber: pr.Phone_Number,
 		Address:     pr.Address,
 		Email:       pr.Email,
 	}
@@ -56,12 +56,12 @@ func arrModToCl(mods []models.Client) []client.Client {
 
 func modToPr(mod *models.Client) *client.Client {
 	return &client.Client{
-		Id:          mod.Id,
-		Name:        mod.Name,
-		FIO:         mod.FIO,
-		PhoneNumber: mod.PhoneNumber,
-		Address:     mod.Address,
-		Email:       mod.Email,
+		Id:           mod.Id,
+		Name:         mod.Name,
+		FIO:          mod.FIO,
+		Phone_Number: mod.PhoneNumber,
+		Address:      mod.Address,
+		Email:        mod.Email,
 	}
 }
 

@@ -10,47 +10,44 @@ import (
 	_ "github.com/jackc/pgx/stdlib"
 )
 
-type ClientRepository struct {
+type ProductRepository struct {
 	db *sql.DB
 }
 
-func NewClientRepository(lib_db *sql.DB) *ClientRepository {
+func NewProductRepository(lib_db *sql.DB) *ProductRepository {
 	err := dbutil.CreateTable(lib_db,
-		`CREATE TABLE IF NOT EXISTS Client (
+		`CREATE TABLE IF NOT EXISTS Product (
 	 		id		 SERIAL PRIMARY KEY UNIQUE,
 	 		Name			 VARCHAR(200) NOT NULL,
-	 		FIO				 VARCHAR(200) NOT NULL,
-			address			 VARCHAR(200) NOT NULL,
-			email			 VARCHAR(100),
-			phone_number	 	 CHAR(14) CHECK(char_length(phone_number) = 13)
+			Description 	 VARCHAR(1000)
 	);`)
 
 	if err != nil {
 		panic(err)
 	}
 
-	return &ClientRepository{
+	return &ProductRepository{
 		db: lib_db,
 	}
 }
 
-func (pr *ClientRepository) AddClient(ctx context.Context, mp *models.Client) error {
-	stmt, err := pr.db.Prepare(
-		`INSERT INTO Client (Name, FIO, address, phone_number, email) VALUES ($1, $2, $3, $4, $5)`)
+func (p *ProductRepository) Add(ctx context.Context, pr *models.Product) error {
+	stmt, err := p.db.Prepare(
+		`INSERT INTO Product (Name, Description) VALUES ($1, $2)`)
 	if err != nil {
-		return err
+		return fmt.Errorf("prepare query: %v", err)
 	}
 
-	if _, err := stmt.Exec(mp.Name, mp.FIO, mp.Address, mp.PhoneNumber, mp.Email); err != nil {
-		return err
+	if _, err := stmt.Exec(pr.Name, pr.Description); err != nil {
+		return fmt.Errorf("exec query: %v", err)
 	}
 
 	return nil
 }
 
-func (pr *ClientRepository) UpdateClient(ctx context.Context, code int, fields map[string]interface{}) error {
+func (pr *ProductRepository) Update(ctx context.Context, code int, fields map[string]interface{}) error {
 	for key, value := range fields {
-		stmt, err := pr.db.Prepare(fmt.Sprintf("UPDATE Client SET %v=$1 WHERE id = $2", key))
+		stmt, err := pr.db.Prepare(fmt.Sprintf("UPDATE Product SET %v=$1 WHERE id = $2", key))
 		if err != nil {
 			return fmt.Errorf("incorrect field in provider table: %v", err)
 		}
@@ -60,11 +57,10 @@ func (pr *ClientRepository) UpdateClient(ctx context.Context, code int, fields m
 		}
 	}
 	return nil
-
 }
 
-func (pr *ClientRepository) DeleteClient(ctx context.Context, code int) error {
-	stmt, err := pr.db.Prepare("DELETE FROM Client WHERE id = $1")
+func (pr *ProductRepository) Delete(ctx context.Context, code int) error {
+	stmt, err := pr.db.Prepare("DELETE FROM Product WHERE id = $1")
 	if err != nil {
 		return fmt.Errorf("incorrect stmt: %v", err)
 	}
@@ -76,8 +72,8 @@ func (pr *ClientRepository) DeleteClient(ctx context.Context, code int) error {
 	return nil
 }
 
-func (pr *ClientRepository) GetClients(ctx context.Context) ([]models.Client, error) {
-	stmt, err := pr.db.Prepare("SELECT * FROM Client")
+func (pr *ProductRepository) Gets(ctx context.Context) ([]models.Product, error) {
+	stmt, err := pr.db.Prepare("SELECT * FROM Product")
 	if err != nil {
 		return nil, fmt.Errorf("incorrect stmt: %v", err)
 	}
@@ -88,7 +84,7 @@ func (pr *ClientRepository) GetClients(ctx context.Context) ([]models.Client, er
 	}
 	defer dbRlt.Close()
 
-	result := new([]models.Client)
+	result := new([]models.Product)
 
 	*result, err = scanClient(dbRlt, *result)
 	if err != nil {
@@ -98,8 +94,8 @@ func (pr *ClientRepository) GetClients(ctx context.Context) ([]models.Client, er
 	return *result, nil
 }
 
-func (pr *ClientRepository) DeleteAll() error {
-	stmt, err := pr.db.Prepare("DELETE FROM Client")
+func (pr *ProductRepository) DeleteAll() error {
+	stmt, err := pr.db.Prepare("DELETE FROM Product")
 	if err != nil {
 		return fmt.Errorf("incorrect stmt: %v", err)
 	}
@@ -111,8 +107,8 @@ func (pr *ClientRepository) DeleteAll() error {
 	return nil
 }
 
-func (r *ClientRepository) FilterClient(ctx context.Context, key, value string) ([]models.Client, error) {
-	stmt, err := r.db.Prepare(fmt.Sprintf("SELECT * FROM Client WHERE %v LIKE $1", key))
+func (r *ProductRepository) Filter(ctx context.Context, key, value string) ([]models.Product, error) {
+	stmt, err := r.db.Prepare(fmt.Sprintf("SELECT * FROM Product WHERE %v LIKE $1", key))
 	if err != nil {
 		return nil, fmt.Errorf("incorrect stmt to db: %v", err)
 	}
@@ -122,7 +118,7 @@ func (r *ClientRepository) FilterClient(ctx context.Context, key, value string) 
 		return nil, fmt.Errorf("stmt-query error: %v", err)
 	}
 
-	result := make([]models.Client, 0)
+	result := make([]models.Product, 0)
 
 	result, err = scanClient(query, result)
 	if err != nil {
@@ -132,10 +128,10 @@ func (r *ClientRepository) FilterClient(ctx context.Context, key, value string) 
 	return result, nil
 }
 
-func scanClient(rows *sql.Rows, result []models.Client) ([]models.Client, error) {
+func scanClient(rows *sql.Rows, result []models.Product) ([]models.Product, error) {
 	for rows.Next() {
-		tmp := models.Client{}
-		if err := rows.Scan(&tmp.Id, &tmp.Name, &tmp.FIO, &tmp.Address, &tmp.PhoneNumber, &tmp.Email); err != nil {
+		tmp := models.Product{}
+		if err := rows.Scan(&tmp.Id, &tmp.Name, &tmp.Description); err != nil {
 			return nil, fmt.Errorf("scan is failed: %v", err)
 		}
 

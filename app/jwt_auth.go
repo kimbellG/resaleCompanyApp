@@ -15,8 +15,10 @@ import (
 )
 
 type access string
+type user string
 
 const accessProfile = access("access")
+const userInfo = user("user")
 
 var JWTAuthentication = func(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -38,6 +40,7 @@ var JWTAuthentication = func(next http.Handler) http.Handler {
 		}
 
 		ctx := context.WithValue(r.Context(), accessProfile, tokenInfo.AccessProfile)
+		ctx = context.WithValue(ctx, userInfo, tokenInfo.Login)
 		r = r.WithContext(ctx)
 		next.ServeHTTP(w, r)
 	})
@@ -103,8 +106,9 @@ func isInvalidFormatOfToken(headerWord []string) bool {
 var LogNewConnection = func(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if !isPublicPath(r.URL.Path) {
-			user := r.Context().Value(accessProfile)
-			log.Printf("Connection user: %v", user)
+			acs := r.Context().Value(accessProfile)
+			usr := r.Context().Value(userInfo)
+			log.Printf("Connection user: %v:%v", usr, acs)
 			next.ServeHTTP(w, r)
 		} else {
 			next.ServeHTTP(w, r)
@@ -116,7 +120,7 @@ var LogNewConnection = func(next http.Handler) http.Handler {
 var CheckAccessRight = func(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if isPublicPath(r.URL.Path) {
-			log.Println("is public path: don't check access right")
+			log.Println("is public path: don't check access right:", r.URL.Path)
 			next.ServeHTTP(w, r)
 			return
 		}

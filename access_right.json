@@ -8,6 +8,11 @@
         "/client/get",
         "/client/update",
         "/client/delete",
-        "/client/filter"
+        "/client/filter",
+        "/product/add",
+        "/product/get",
+        "/product/update",
+        "/product/delete",
+        "/product/filter"
     ]
 }

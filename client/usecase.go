@@ -5,12 +5,12 @@ import (
 )
 
 type Client struct {
-	Id          int
-	Name        string
-	FIO         string
-	Address     string
-	PhoneNumber string
-	Email       string
+	Id           int
+	Name         string
+	FIO          string
+	Address      string
+	Phone_Number string
+	Email        string
 }
 
 type UseCase interface {

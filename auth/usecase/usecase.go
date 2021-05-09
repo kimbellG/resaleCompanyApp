@@ -50,6 +50,7 @@ func (a *AuthUseCase) SignIn(ctx context.Context, username, password string) (st
 
 func NewTokenInfo(user *models.User) *models.TokenInfo {
 	return &models.TokenInfo{
+		Login:          user.Login,
 		AccessProfile:  user.Access,
 		StandardClaims: jwt.StandardClaims{},
 	}
