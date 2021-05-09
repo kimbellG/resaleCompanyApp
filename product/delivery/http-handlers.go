@@ -33,7 +33,7 @@ func (h *Handler) Add(w http.ResponseWriter, r *http.Request) {
 	newRecord := &AddRequests{}
 	if err := decodingJson(r, newRecord); err != nil {
 		addLogger.Debugf("Invalid json in request: %v", err)
-		http.Error(w, "Invalid client json", http.StatusBadRequest)
+		http.Error(w, "Invalid product json", http.StatusBadRequest)
 		return
 	}
 
@@ -62,7 +62,7 @@ func decodingJson(r *http.Request, strct interface{}) error {
 
 func (h *Handler) Gets(w http.ResponseWriter, r *http.Request) {
 	getLogger := logger.NewLoggerWithFields(
-		map[string]interface{}{"action": "Get provider"},
+		map[string]interface{}{"action": "Get product"},
 	)
 
 	resultPrv, err := h.useCase.Gets(r.Context())
@@ -119,7 +119,7 @@ type UpdateRequest struct {
 
 func (h *Handler) Update(w http.ResponseWriter, r *http.Request) {
 	updateLogger := logger.NewLoggerWithFields(
-		map[string]interface{}{"action": "Update provider"},
+		map[string]interface{}{"action": "Update product"},
 	)
 
 	fields := new([]UpdateRequest)
@@ -155,13 +155,13 @@ type deleteRequest struct {
 
 func (h *Handler) Delete(w http.ResponseWriter, r *http.Request) {
 	deleteLogger := logger.NewLoggerWithFields(
-		map[string]interface{}{"action": "Delete Provider"},
+		map[string]interface{}{"action": "Delete product"},
 	)
 
 	req := &deleteRequest{}
 	if err := decodingJson(r, req); err != nil {
 		deleteLogger.Debugf("Invalid request: %v", err)
-		http.Error(w, "Incorrect update request", http.StatusBadRequest)
+		http.Error(w, "Incorrect delete request", http.StatusBadRequest)
 		return
 	}
 
@@ -174,7 +174,7 @@ func (h *Handler) Delete(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) Filter(w http.ResponseWriter, r *http.Request) {
 	filterLogger := logger.NewLoggerWithFields(
-		map[string]interface{}{"action": "filter client"},
+		map[string]interface{}{"action": "filter product"},
 	)
 
 	if err := r.ParseForm(); err != nil {
