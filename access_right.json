@@ -3,6 +3,11 @@
         "/provider/add",
         "/provider/get",
         "/provider/update",
-        "/provider/delete"
+        "/provider/delete",
+        "/client/add",
+        "/client/get",
+        "/client/update",
+        "/client/delete",
+        "/client/filter"
     ]
 }
