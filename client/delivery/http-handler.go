@@ -68,7 +68,7 @@ func decodingJson(r *http.Request, strct interface{}) error {
 
 func (h *Handler) GetClients(w http.ResponseWriter, r *http.Request) {
 	getLogger := logger.NewLoggerWithFields(
-		map[string]interface{}{"action": "Get provider"},
+		map[string]interface{}{"action": "Get client"},
 	)
 
 	resultPrv, err := h.useCase.GetClients(r.Context())
@@ -128,7 +128,7 @@ type UpdateRequest struct {
 
 func (h *Handler) UpdateClient(w http.ResponseWriter, r *http.Request) {
 	updateLogger := logger.NewLoggerWithFields(
-		map[string]interface{}{"action": "Update provider"},
+		map[string]interface{}{"action": "Update client"},
 	)
 
 	fields := new([]UpdateRequest)
@@ -164,13 +164,13 @@ type deleteRequest struct {
 
 func (h *Handler) DeleteClient(w http.ResponseWriter, r *http.Request) {
 	deleteLogger := logger.NewLoggerWithFields(
-		map[string]interface{}{"action": "Delete Provider"},
+		map[string]interface{}{"action": "Delete client"},
 	)
 
 	req := &deleteRequest{}
 	if err := decodingJson(r, req); err != nil {
 		deleteLogger.Debugf("Invalid request: %v", err)
-		http.Error(w, "Incorrect update request", http.StatusBadRequest)
+		http.Error(w, "Incorrect delete request", http.StatusBadRequest)
 		return
 	}
 

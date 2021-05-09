@@ -18,7 +18,7 @@ func NewProductRepository(lib_db *sql.DB) *ProductRepository {
 	err := dbutil.CreateTable(lib_db,
 		`CREATE TABLE IF NOT EXISTS Product (
 	 		id		 SERIAL PRIMARY KEY UNIQUE,
-	 		Name			 VARCHAR(200) NOT NULL,
+	 		Name			 VARCHAR(200) NOT NULL UNIQUE,
 			Description 	 VARCHAR(1000)
 	);`)
 
@@ -143,4 +143,54 @@ func scanClient(rows *sql.Rows, result []models.Product) ([]models.Product, erro
 	}
 
 	return result, nil
+}
+
+func (r *ProductRepository) GetIDByName(ctx context.Context, name string) (int, error) {
+	stmt, err := r.db.Prepare("SELECT id FROM Product WHERE name = $1")
+	if err != nil {
+		return -1, fmt.Errorf("prepare stmt: %v", err)
+	}
+
+	query, err := stmt.Query(name)
+	if err != nil {
+		return -1, fmt.Errorf("exec stmt: %v", err)
+	}
+
+	var result int
+	for query.Next() {
+		if err := query.Scan(&result); err != nil {
+			return -1, fmt.Errorf("scan: %v", err)
+		}
+	}
+
+	if result == 0 {
+		return -1, fmt.Errorf("result is empty")
+	}
+
+	return result, nil
+}
+
+func (r *ProductRepository) GetNameById(id int) (string, error) {
+	stmt, err := r.db.Prepare("SELECT id FROM Product WHERE name = $1")
+	if err != nil {
+		return "", fmt.Errorf("prepare stmt: %v", err)
+	}
+
+	query, err := stmt.Query(id)
+	if err != nil {
+		return "", fmt.Errorf("query stmt: %v", err)
+	}
+
+	var name string
+	for query.Next() {
+		if err := query.Scan(&name); err != nil {
+			return "", fmt.Errorf("scan: %v", err)
+		}
+	}
+
+	if name == "" {
+		return "", fmt.Errorf("name not found")
+	}
+
+	return name, nil
 }
