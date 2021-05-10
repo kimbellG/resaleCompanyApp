@@ -206,3 +206,39 @@ func (o *OrderRepository) GetInInterval(ctx context.Context, start, end string) 
 
 	return result, nil
 }
+
+func (o *OrderRepository) UpdateStatus(ctx context.Context, id int, newStatus string) error {
+	stmt, err := o.db.Prepare("UPDATE Order SET status=$1 WHERE id = $1")
+	if err != nil {
+		return fmt.Errorf("prepare stmt: %v", err)
+	}
+
+	if _, err := stmt.Exec(newStatus, id); err != nil {
+		return fmt.Errorf("exec stmt: %v", err)
+	}
+
+	return nil
+}
+
+func (o *OrderRepository) Filter(ctx context.Context, key string, value interface{}) ([]models.Order, error) {
+	result, err := *new([]models.Order), error(nil)
+	switch v := value.(type) {
+	case string:
+		result, err = o.getOrderInformation(fmt.Sprintf("SELECT * FROM Order WHERE %v LIKE $1", key), fmt.Sprintf("%%%v%%", v))
+	default:
+		result, err = o.getOrderInformation(fmt.Sprintf("SELECT * FROM Order WHERE %v = $1", key), v)
+	}
+
+	if err != nil {
+		return nil, fmt.Errorf("repo order: %v", err)
+	}
+
+	for _, order := range result {
+		order.Offers, err = o.getOfferInformation(order.Id)
+		if err != nil {
+			return nil, fmt.Errorf("repo offer: %v", err)
+		}
+	}
+
+	return result, nil
+}
