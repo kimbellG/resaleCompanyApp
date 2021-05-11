@@ -114,3 +114,17 @@ func (o *OfferRepository) Delete(ctx context.Context, providerId, productId int)
 
 	return nil
 }
+
+func (o *OfferRepository) GetById(id int) (*models.Offer, error) {
+	stmt, err := o.db.Prepare("SELECT * FROM Offer WHERE id = $1")
+	if err != nil {
+		return nil, fmt.Errorf("prepare stmt: %v", err)
+	}
+
+	result := &models.Offer{}
+	if err := stmt.QueryRow(id).Scan(&result.Id, &result.ProductId, &result.ProviderId, &result.Cost); err != nil {
+		return nil, fmt.Errorf("scan result: %v", err)
+	}
+
+	return result, nil
+}

@@ -98,3 +98,18 @@ func isNotKeyOfStruct(key string) bool {
 
 	return true
 }
+
+func (u *ClientUseCase) GetById(id int) (*client.Client, error) {
+	base, err := u.GetClients(context.Background())
+	if err != nil {
+		return nil, fmt.Errorf("get all client: %v", err)
+	}
+
+	for _, cl := range base {
+		if cl.Id == id {
+			return &cl, nil
+		}
+	}
+
+	return nil, fmt.Errorf("client with id:%v not found", id)
+}

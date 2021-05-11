@@ -11,4 +11,5 @@ type Repository interface {
 	GetOfferOfProvider(ctx context.Context, providerId int) ([]models.Offer, error)
 	UpdateCost(ctx context.Context, providerId, productId int, cost float32) error
 	Delete(ctx context.Context, providerId, productId int) error
+	GetById(id int) (*models.Offer, error)
 }
