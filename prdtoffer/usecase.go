@@ -5,6 +5,7 @@ import (
 )
 
 type Offer struct {
+	Id           int
 	ProductName  string
 	ProviderName string
 	Cost         float32

@@ -13,5 +13,5 @@ func RegisterEndpoints(router *mux.Router, uc order.UseCase) {
 	router.HandleFunc("/order/get", h.Gets)
 	router.HandleFunc("/order/get/interval", h.GetInInterval)
 	router.HandleFunc("/order/update/status", h.UpdateStatus)
-	router.HandleFunc("/client/filter", h.Filter)
+	router.HandleFunc("/order/filter", h.Filter)
 }

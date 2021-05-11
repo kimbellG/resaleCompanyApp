@@ -20,6 +20,7 @@ func NewHandler(cases prdtoffer.UseCase) *Handler {
 }
 
 type AddRequests struct {
+	Id       int     `json:"id"`
 	Provider string  `json:"provider"`
 	Product  string  `json:"product"`
 	Cost     float32 `json:"cost"`
@@ -46,6 +47,7 @@ func (h *Handler) Add(w http.ResponseWriter, r *http.Request) {
 
 func reqToProduct(req *AddRequests) *prdtoffer.Offer {
 	return &prdtoffer.Offer{
+		Id:           req.Id,
 		ProductName:  req.Product,
 		ProviderName: req.Provider,
 		Cost:         req.Cost,
@@ -122,6 +124,7 @@ func encodingInBody(w *http.ResponseWriter, products []prdtoffer.Offer) error {
 
 func provToClient(offer *prdtoffer.Offer) *AddRequests {
 	return &AddRequests{
+		Id:       offer.Id,
 		Product:  offer.ProductName,
 		Provider: offer.ProviderName,
 		Cost:     offer.Cost,

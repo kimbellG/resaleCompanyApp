@@ -184,7 +184,7 @@ type UpdateRequest struct {
 }
 
 func (h *Handler) UpdateStatus(w http.ResponseWriter, r *http.Request) {
-	req := UpdateRequest{}
+	req := &UpdateRequest{}
 
 	if err := decodingJson(r, req); err != nil {
 		h.OrderLogger.Debugf("update status: invalid json body: %v", err)
@@ -223,7 +223,7 @@ func (h *Handler) Filter(w http.ResponseWriter, r *http.Request) {
 			}
 			result, filterErr = h.usecase.Filter(r.Context(), key, val_int)
 		case "status":
-			result, filterErr = h.usecase.Filter(r.Context(), key, value)
+			result, filterErr = h.usecase.Filter(r.Context(), key, value[0])
 		default:
 			h.OrderLogger.Debug("filter: incorrect key value")
 			http.Error(w, fmt.Sprintf("key(%v) not exists", key), http.StatusBadRequest)

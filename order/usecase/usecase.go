@@ -26,7 +26,11 @@ func NewOrderUseCase(rep order.Repository, cl order.ClientController, off order.
 
 func (o *OrderUseCase) Add(ctx context.Context, order *models.Order) error {
 
-	return fmt.Errorf("usecase add: %v", o.repo.Add(ctx, order))
+	if err := o.repo.Add(ctx, order); err != nil {
+		return fmt.Errorf("repo: %v", err)
+	}
+
+	return nil
 }
 
 func (o *OrderUseCase) Gets(ctx context.Context) ([]order.OrderOutput, error) {
@@ -86,7 +90,7 @@ func (o *OrderUseCase) modToOrderOutput(mod *models.Order) (*order.OrderOutput, 
 }
 
 func (o *OrderUseCase) GetInInterval(ctx context.Context, start, end time.Time) ([]order.OrderOutput, error) {
-	result, err := o.repo.GetInInterval(ctx, start.Format("2004-10-19 10:23:54"), end.Format("2004-10-19 10:23:54"))
+	result, err := o.repo.GetInInterval(ctx, start.Format(time.UnixDate), end.Format(time.UnixDate))
 	if err != nil {
 		return nil, fmt.Errorf("repo: %v", err)
 	}

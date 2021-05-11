@@ -100,6 +100,7 @@ func (o *ProductOfferUseCase) modToOffer(mod models.Offer) (*prdtoffer.Offer, er
 		return nil, err
 	}
 
+	result.Id = mod.Id
 	result.Cost = mod.Cost
 
 	return result, nil

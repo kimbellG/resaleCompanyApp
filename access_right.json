@@ -17,6 +17,11 @@
         "/offer/add",
         "/offer/get",
         "/offer/update",
-        "/offer/delete"
+        "/offer/delete",
+        "/order/add",
+        "/order/get",
+        "/order/get/interval",
+        "/order/update/status",
+        "/order/filter"
     ]
 }

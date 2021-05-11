@@ -16,14 +16,14 @@ type OrderRepository struct {
 
 func NewOrderRepository(lib_db *sql.DB) *OrderRepository {
 	err := dbutil.CreateTable(lib_db,
-		`CREATE TABLE IF NOT EXISTS Order (
-		id SERIAL PRiMARY KEY,
-		clientId INT REFERENCES Client (id),
-		manager INT REFERENCES userInformation (id),
-		date timestamp,
-		quantity INT NOT NULL,
-		status VARCHAR(100) NOT NULL
-	);`)
+		`CREATE TABLE IF NOT EXISTS ProductOrder (
+	 		id	SERIAL PRIMARY KEY UNIQUE,
+			clientId INTEGER REFERENCES Client (id),
+			manager INTEGER REFERENCES userInformation (id),
+			date timestamp,
+			quantity INT NOT NULL,
+			status VARCHAR(100) NOT NULL
+		);`)
 
 	if err != nil {
 		panic(fmt.Errorf("order table: %v", err))
@@ -32,7 +32,7 @@ func NewOrderRepository(lib_db *sql.DB) *OrderRepository {
 	err = dbutil.CreateTable(lib_db,
 		`CREATE TABLE IF NOT EXISTS Purchases (
 		id SERIAL PRIMARY KEY,
-		orderID INT REFERENCES Order (id),
+		orderID INT REFERENCES ProductOrder (id),
 		offerID INT REFERENCES Offer (id)
 	);`)
 
@@ -59,7 +59,7 @@ func (o *OrderRepository) Add(ctx context.Context, order *models.Order) error {
 }
 
 func (o *OrderRepository) addOrderInformation(order *models.Order) (int, error) {
-	stmt, err := o.db.Prepare("INSERT INTO Order (clientId, manager, date, quantity, status) VALUES ($1, $2, $3, $4, $5) RETURNING id")
+	stmt, err := o.db.Prepare("INSERT INTO ProductOrder (clientId, manager, date, quantity, status) VALUES ($1, $2, $3, $4, $5) RETURNING id")
 	if err != nil {
 		return -1, fmt.Errorf("prepare stmt: %v", err)
 	}
@@ -107,13 +107,13 @@ func (o *OrderRepository) addOfferInformation(order int, offerIDs []int) error {
 }
 
 func (o *OrderRepository) Gets(ctx context.Context) ([]models.Order, error) {
-	result, err := o.getOrderInformation("SELECT * FROM Order")
+	result, err := o.getOrderInformation("SELECT * FROM ProductOrder")
 	if err != nil {
 		return nil, fmt.Errorf("get order information: %v", err)
 	}
 
-	for _, order := range result {
-		order.Offers, err = o.getOfferInformation(order.Id)
+	for i, order := range result {
+		result[i].Offers, err = o.getOfferInformation(order.Id)
 		if err != nil {
 			return nil, fmt.Errorf("get offer information: %v", err)
 		}
@@ -128,7 +128,7 @@ func (o *OrderRepository) getOrderInformation(query string, arg ...interface{}) 
 		return nil, fmt.Errorf("prepare stmt: %v", err)
 	}
 
-	rows, err := stmt.Query(arg)
+	rows, err := stmt.Query(arg...)
 	if err != nil {
 		return nil, fmt.Errorf("query stmt: %v", err)
 	}
@@ -154,7 +154,7 @@ func (o *OrderRepository) getOrderInformation(query string, arg ...interface{}) 
 }
 
 func (o *OrderRepository) getLoginManagerById(id int) (string, error) {
-	stmt, err := o.db.Prepare("SELECT login FROM userInforamtion WHERE id = $1")
+	stmt, err := o.db.Prepare("SELECT login FROM userInformation WHERE id = $1")
 	if err != nil {
 		return "", fmt.Errorf("prepare stmt: %v", err)
 	}
@@ -192,13 +192,13 @@ func (o *OrderRepository) getOfferInformation(offer int) ([]int, error) {
 }
 
 func (o *OrderRepository) GetInInterval(ctx context.Context, start, end string) ([]models.Order, error) {
-	result, err := o.getOrderInformation("SELECT * FROM Order WHERE date BEETWEN $1 AND $2", start, end)
+	result, err := o.getOrderInformation("SELECT * FROM ProductOrder WHERE date BETWEEN $1 AND $2", start, end)
 	if err != nil {
 		return nil, fmt.Errorf("get order information: %v", err)
 	}
 
-	for _, order := range result {
-		order.Offers, err = o.getOfferInformation(order.Id)
+	for i, order := range result {
+		result[i].Offers, err = o.getOfferInformation(order.Id)
 		if err != nil {
 			return nil, fmt.Errorf("get offer information: %v", err)
 		}
@@ -208,7 +208,7 @@ func (o *OrderRepository) GetInInterval(ctx context.Context, start, end string) 
 }
 
 func (o *OrderRepository) UpdateStatus(ctx context.Context, id int, newStatus string) error {
-	stmt, err := o.db.Prepare("UPDATE Order SET status=$1 WHERE id = $1")
+	stmt, err := o.db.Prepare("UPDATE ProductOrder SET status=$1 WHERE id = $2")
 	if err != nil {
 		return fmt.Errorf("prepare stmt: %v", err)
 	}
@@ -224,17 +224,17 @@ func (o *OrderRepository) Filter(ctx context.Context, key string, value interfac
 	result, err := *new([]models.Order), error(nil)
 	switch v := value.(type) {
 	case string:
-		result, err = o.getOrderInformation(fmt.Sprintf("SELECT * FROM Order WHERE %v LIKE $1", key), fmt.Sprintf("%%%v%%", v))
+		result, err = o.getOrderInformation(fmt.Sprintf("SELECT * FROM ProductOrder WHERE %v LIKE $1", key), fmt.Sprintf("%%%v%%", v))
 	default:
-		result, err = o.getOrderInformation(fmt.Sprintf("SELECT * FROM Order WHERE %v = $1", key), v)
+		result, err = o.getOrderInformation(fmt.Sprintf("SELECT * FROM ProductOrder WHERE %v = $1", key), v)
 	}
 
 	if err != nil {
 		return nil, fmt.Errorf("repo order: %v", err)
 	}
 
-	for _, order := range result {
-		order.Offers, err = o.getOfferInformation(order.Id)
+	for i, order := range result {
+		result[i].Offers, err = o.getOfferInformation(order.Id)
 		if err != nil {
 			return nil, fmt.Errorf("repo offer: %v", err)
 		}
