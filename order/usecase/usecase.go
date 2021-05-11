@@ -15,11 +15,12 @@ type OrderUseCase struct {
 	manager order.ManagerController
 }
 
-func NewOrderUseCase(rep order.Repository, cl order.ClientController, off order.OfferController) *OrderUseCase {
+func NewOrderUseCase(rep order.Repository, cl order.ClientController, off order.OfferController, man order.ManagerController) *OrderUseCase {
 	return &OrderUseCase{
-		repo:   rep,
-		client: cl,
-		offer:  off,
+		repo:    rep,
+		client:  cl,
+		offer:   off,
+		manager: man,
 	}
 }
 

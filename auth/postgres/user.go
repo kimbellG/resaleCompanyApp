@@ -138,3 +138,17 @@ func (r *UserRepository) requestUserToDB(username, password string) *User {
 
 	return result
 }
+
+func (r *UserRepository) GetNameByLogin(login string) (string, error) {
+	stmt, err := r.db.Prepare("SELECT name FROM userInformation WHERE login = $1")
+	if err != nil {
+		return "", fmt.Errorf("prepare stmt: %v", err)
+	}
+
+	name := ""
+	if err := stmt.QueryRow(login).Scan(&name); err != nil {
+		return "", fmt.Errorf("scan name: %v", err)
+	}
+
+	return name, nil
+}

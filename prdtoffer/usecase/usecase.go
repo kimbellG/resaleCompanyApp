@@ -154,3 +154,12 @@ func (o *ProductOfferUseCase) Delete(ctx context.Context, productName, providerN
 
 	return nil
 }
+
+func (o *ProductOfferUseCase) GetById(id int) (*prdtoffer.Offer, error) {
+	offer_base, err := o.rep.GetById(id)
+	if err != nil {
+		return nil, fmt.Errorf("repo: %v", err)
+	}
+
+	return o.modToOffer(*offer_base)
+}
