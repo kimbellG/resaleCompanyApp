@@ -152,3 +152,17 @@ func (r *UserRepository) GetNameByLogin(login string) (string, error) {
 
 	return name, nil
 }
+
+func (r *UserRepository) GetIdByLogin(login string) (int, error) {
+	stmt, err := r.db.Prepare("SELECT id FROM userInformation WHERE login = $1")
+	if err != nil {
+		return -1, fmt.Errorf("prepare stmt: %v", err)
+	}
+
+	id := 0
+	if err := stmt.QueryRow(login).Scan(&id); err != nil {
+		return -1, fmt.Errorf("scan id: %v", err)
+	}
+
+	return id, nil
+}

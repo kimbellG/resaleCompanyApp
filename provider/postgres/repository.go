@@ -15,7 +15,7 @@ type ProviderRepository struct {
 }
 
 func NewProviderRepository(lib_db *sql.DB) *ProviderRepository {
-	err := dbutil.CreateTable(lib_db,
+	err := dbutil.Create(lib_db,
 		`CREATE TABLE IF NOT EXISTS Provider (
 	 		vendor_code		 SERIAL PRIMARY KEY UNIQUE,
 	 		name			 VARCHAR(200) NOT NULL UNIQUE,

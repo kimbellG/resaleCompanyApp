@@ -22,6 +22,10 @@
         "/order/get",
         "/order/get/interval",
         "/order/update/status",
-        "/order/filter"
+        "/order/filter",
+        "/rank/add/problem",
+        "/rank/add/mark",
+        "/rank/get",
+        "/rank/get_by_id"
     ]
 }

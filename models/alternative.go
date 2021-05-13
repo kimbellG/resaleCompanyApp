@@ -1,22 +1,22 @@
 package models
 
 type Alternative struct {
-	Id              int
-	Name            string
-	Description     string
-	Marks           map[int]float32
-	SpecificWeights map[int]float32
-	Weight          float32
+	Id              int             `json:"id"`
+	Name            string          `json:"name"`
+	Description     string          `json:"description"`
+	Marks           map[int]float32 `json:"marks"`
+	SpecificWeights map[int]float32 `json:"specific_weights"`
+	Weight          float32         `json:"weights"`
 }
 
 type AlternativeInput struct {
-	ProblemId   int
 	Name        string
 	Description string
 }
 
-type AlternativeMarksInput struct {
+type AlternativeMarkInput struct {
+	ProblemId     int
 	AlternativeId int
 	ExpertLogin   string
-	Marks         []float32
+	Mark          float32
 }

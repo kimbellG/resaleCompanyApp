@@ -15,7 +15,7 @@ type OrderRepository struct {
 }
 
 func NewOrderRepository(lib_db *sql.DB) *OrderRepository {
-	err := dbutil.CreateTable(lib_db,
+	err := dbutil.Create(lib_db,
 		`CREATE TABLE IF NOT EXISTS ProductOrder (
 	 		id	SERIAL PRIMARY KEY UNIQUE,
 			clientId INTEGER REFERENCES Client (id),
@@ -29,7 +29,7 @@ func NewOrderRepository(lib_db *sql.DB) *OrderRepository {
 		panic(fmt.Errorf("order table: %v", err))
 	}
 
-	err = dbutil.CreateTable(lib_db,
+	err = dbutil.Create(lib_db,
 		`CREATE TABLE IF NOT EXISTS Purchases (
 		id SERIAL PRIMARY KEY,
 		orderID INT REFERENCES ProductOrder (id),

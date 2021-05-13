@@ -1,11 +1,10 @@
 package models
 
 type Problem struct {
-	Id           int
-	Name         string
-	Description  string
-	Alternatives []*Alternative
-	Result       *Alternative
+	Id           int            `json:"id"`
+	Name         string         `json:"name"`
+	Description  string         `json:"decriprion"`
+	Alternatives []*Alternative `json:"alternatives"`
 }
 
 type ProblemInput struct {

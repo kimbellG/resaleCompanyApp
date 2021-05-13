@@ -8,7 +8,7 @@ import (
 	_ "github.com/jackc/pgx/stdlib"
 )
 
-func CreateTable(db *sql.DB, query string) error {
+func Create(db *sql.DB, query string) error {
 	stmt, err := db.Prepare(query)
 
 	if err != nil {

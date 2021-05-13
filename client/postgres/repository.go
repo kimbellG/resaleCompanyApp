@@ -15,7 +15,7 @@ type ClientRepository struct {
 }
 
 func NewClientRepository(lib_db *sql.DB) *ClientRepository {
-	err := dbutil.CreateTable(lib_db,
+	err := dbutil.Create(lib_db,
 		`CREATE TABLE IF NOT EXISTS Client (
 	 		id		 SERIAL PRIMARY KEY UNIQUE,
 	 		Name			 VARCHAR(200) NOT NULL,

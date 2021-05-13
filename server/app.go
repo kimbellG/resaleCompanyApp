@@ -39,6 +39,11 @@ import (
 	orderrep "cw/order/postgres"
 	ordercase "cw/order/usecase"
 
+	"cw/rang"
+	rangdlvr "cw/rang/delivery"
+	rangrep "cw/rang/postgres"
+	rangcase "cw/rang/usecase"
+
 	"cw/app"
 
 	"github.com/gorilla/mux"
@@ -52,6 +57,7 @@ type App struct {
 	prd            product.UseCase
 	offer          prdtoffer.UseCase
 	ord            order.UseCase
+	rank           rang.Usecase
 }
 
 func NewApp() *App {
@@ -63,6 +69,7 @@ func NewApp() *App {
 	prdRepo := prdrep.NewProductRepository(db)
 	offerRepo := offerrep.NewOfferRepository(db)
 	orderRepo := orderrep.NewOrderRepository(db)
+	rankRepo := rangrep.NewRangPostgres(db)
 
 	return &App{
 		authController: usecase.NewAuthUseCase(
@@ -73,6 +80,7 @@ func NewApp() *App {
 		prd:      prduse.NewProductUseCase(prdRepo),
 		offer:    offercase.NewProductOfferUseCase(offerRepo, providerRepo, prdRepo),
 		ord:      ordercase.NewOrderUseCase(orderRepo, client_usecase.NewClientUseCase(cltRepo), offercase.NewProductOfferUseCase(offerRepo, providerRepo, prdRepo), userRepo),
+		rank:     rangcase.NewRangUseCase(rankRepo, userRepo),
 	}
 }
 
@@ -98,6 +106,7 @@ func (a *App) Run(port string) {
 	prddlvr.RegisterEndpoints(router, a.prd)
 	offerdlvr.RegisterEndpoints(router, a.offer)
 	orderdlvr.RegisterEndpoints(router, a.ord)
+	rangdlvr.RegisterEndpoints(router, a.rank)
 
 	router.Use(app.JWTAuthentication)
 	router.Use(app.CheckAccessRight)

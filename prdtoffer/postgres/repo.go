@@ -15,7 +15,7 @@ type OfferRepository struct {
 }
 
 func NewOfferRepository(lib_db *sql.DB) *OfferRepository {
-	err := dbutil.CreateTable(lib_db,
+	err := dbutil.Create(lib_db,
 		`CREATE TABLE IF NOT EXISTS Offer (
 			id SERIAL PRIMARY KEY UNIQUE,
 			productId INT REFERENCES Product (id),

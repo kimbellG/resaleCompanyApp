@@ -15,7 +15,7 @@ type ProductRepository struct {
 }
 
 func NewProductRepository(lib_db *sql.DB) *ProductRepository {
-	err := dbutil.CreateTable(lib_db,
+	err := dbutil.Create(lib_db,
 		`CREATE TABLE IF NOT EXISTS Product (
 	 		id		 SERIAL PRIMARY KEY UNIQUE,
 	 		Name			 VARCHAR(200) NOT NULL UNIQUE,
