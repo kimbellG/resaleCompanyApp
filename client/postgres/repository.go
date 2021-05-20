@@ -135,7 +135,7 @@ func (r *ClientRepository) FilterClient(ctx context.Context, key, value string) 
 func scanClient(rows *sql.Rows, result []models.Client) ([]models.Client, error) {
 	for rows.Next() {
 		tmp := models.Client{}
-		if err := rows.Scan(&tmp.Id, &tmp.Name, &tmp.FIO, &tmp.Address, &tmp.PhoneNumber, &tmp.Email); err != nil {
+		if err := rows.Scan(&tmp.Id, &tmp.Name, &tmp.FIO, &tmp.Address, &tmp.Email, &tmp.PhoneNumber); err != nil {
 			return nil, fmt.Errorf("scan is failed: %v", err)
 		}
 

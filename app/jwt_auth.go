@@ -15,10 +15,10 @@ import (
 )
 
 type access string
-type user string
+type User string
 
 const accessProfile = access("access")
-const UserInfo = user("user")
+const UserInfo = User("user")
 
 var JWTAuthentication = func(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

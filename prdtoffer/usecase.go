@@ -6,8 +6,8 @@ import (
 
 type Offer struct {
 	Id           int
-	ProductName  string
-	ProviderName string
+	ProductName  string `json:"product"`
+	ProviderName string `json:"provider"`
 	Cost         float32
 }
 

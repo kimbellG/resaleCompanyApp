@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"cw/app"
 	"cw/models"
 	"cw/order"
 	"fmt"
@@ -25,7 +26,7 @@ func NewOrderUseCase(rep order.Repository, cl order.ClientController, off order.
 }
 
 func (o *OrderUseCase) Add(ctx context.Context, order *models.Order) error {
-
+	order.ManagerLogin = ctx.Value(app.UserInfo).(string)
 	if err := o.repo.Add(ctx, order); err != nil {
 		return fmt.Errorf("repo: %v", err)
 	}

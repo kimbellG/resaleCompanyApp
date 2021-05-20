@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"cw/app"
 	"cw/models"
 	"cw/rang"
 	"fmt"
@@ -41,6 +42,8 @@ func (r *RangUseCase) AddAlternativeMark(ctx context.Context, alternativeMarks *
 	if err != nil {
 		return fmt.Errorf("find alternative in problem: %v", err)
 	}
+
+	alternativeMarks.ExpertLogin = ctx.Value(app.UserInfo).(string)
 
 	expertId, err := r.user.GetIdByLogin(alternativeMarks.ExpertLogin)
 	if err != nil {
