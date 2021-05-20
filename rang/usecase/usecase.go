@@ -32,6 +32,76 @@ func (r *RangUseCase) Add(ctx context.Context, problem *models.ProblemInput) err
 	return nil
 }
 
+func (r *RangUseCase) AddAlternative(ctx context.Context, problemName string, alternative *models.AlternativeInput) error {
+
+	id, err := r.getProblemByName(ctx, problemName)
+	if err != nil {
+		return fmt.Errorf("get problem's id: %v", err)
+	}
+
+	if err := r.repo.AddAlternative(ctx, id, alternative); err != nil {
+		return fmt.Errorf("repo: %v", err)
+	}
+
+	return nil
+}
+
+func (r *RangUseCase) getProblemByName(ctx context.Context, name string) (int, error) {
+	problems, err := r.Gets(ctx)
+	if err != nil {
+		return -1, fmt.Errorf("get all problems: %v", err)
+	}
+
+	for _, problem := range problems {
+		if problem.Name == name {
+			return problem.Id, nil
+		}
+	}
+
+	return -1, fmt.Errorf("not found")
+}
+
+func (r *RangUseCase) AddMarkByNames(ctx context.Context, mark *rang.AlternativeMarkInput) error {
+	problemID, alternativeID, err := r.getProblemAlternativeIDsByName(ctx, mark)
+	if err != nil {
+		return fmt.Errorf("get problem and alternative IDs: %v", err)
+	}
+
+	err = r.AddAlternativeMark(ctx,
+		&models.AlternativeMarkInput{
+			ProblemId:     problemID,
+			AlternativeId: alternativeID,
+			ExpertLogin:   mark.ExpertLogin,
+			Mark:          mark.Mark,
+		},
+	)
+
+	if err != nil {
+		return fmt.Errorf("add alternative mark with ids: %v", err)
+	}
+
+	return nil
+}
+
+func (r *RangUseCase) getProblemAlternativeIDsByName(ctx context.Context, mark *rang.AlternativeMarkInput) (int, int, error) {
+	problems, err := r.Gets(ctx)
+	if err != nil {
+		return -1, -1, fmt.Errorf("get all problem: %v", err)
+	}
+
+	for _, problem := range problems {
+		if problem.Name == mark.ProblemName {
+			for _, alternative := range problem.Alternatives {
+				if alternative.Name == mark.AlternativeName {
+					return problem.Id, alternative.Id, nil
+				}
+			}
+		}
+	}
+
+	return -1, -1, fmt.Errorf("not found")
+}
+
 func (r *RangUseCase) AddAlternativeMark(ctx context.Context, alternativeMarks *models.AlternativeMarkInput) error {
 	problem, err := r.repo.GetProblemReport(ctx, alternativeMarks.ProblemId)
 	if err != nil {

@@ -77,9 +77,9 @@ func NewApp() *App {
 			[]byte(os.Getenv("KEYPASSWORD"))),
 		provider: prv_usecase.NewProviderUseCase(providerRepo),
 		clt:      client_usecase.NewClientUseCase(cltRepo),
-		prd:      prduse.NewProductUseCase(prdRepo),
-		offer:    offercase.NewProductOfferUseCase(offerRepo, providerRepo, prdRepo),
-		ord:      ordercase.NewOrderUseCase(orderRepo, client_usecase.NewClientUseCase(cltRepo), offercase.NewProductOfferUseCase(offerRepo, providerRepo, prdRepo), userRepo),
+		prd:      prduse.NewProductUseCase(prdRepo, rankRepo),
+		offer:    offercase.NewProductOfferUseCase(offerRepo, providerRepo, prdRepo, rangcase.NewRangUseCase(rankRepo, userRepo)),
+		ord:      ordercase.NewOrderUseCase(orderRepo, client_usecase.NewClientUseCase(cltRepo), offercase.NewProductOfferUseCase(offerRepo, providerRepo, prdRepo, rangcase.NewRangUseCase(rankRepo, userRepo)), userRepo),
 		rank:     rangcase.NewRangUseCase(rankRepo, userRepo),
 	}
 }

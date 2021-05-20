@@ -9,20 +9,39 @@ import (
 	"strings"
 )
 
-type ProductUseCase struct {
-	rep product.Repository
+type RankProblem interface {
+	Add(ctx context.Context, product *models.ProblemInput) error
 }
 
-func NewProductUseCase(rep_pr product.Repository) *ProductUseCase {
+type ProductUseCase struct {
+	rep  product.Repository
+	rank RankProblem
+}
+
+func NewProductUseCase(rep_pr product.Repository, rank RankProblem) *ProductUseCase {
 	return &ProductUseCase{
-		rep: rep_pr,
+		rep:  rep_pr,
+		rank: rank,
 	}
 }
 
 func (p *ProductUseCase) Add(ctx context.Context, pr *product.Product) error {
 	modProvider := clToModels(pr)
 
-	return p.rep.Add(ctx, modProvider)
+	if err := p.rep.Add(ctx, modProvider); err != nil {
+		return fmt.Errorf("repo add product information: %v", err)
+	}
+
+	if err := p.rank.Add(ctx,
+		&models.ProblemInput{
+			Name:        pr.Name,
+			Description: "Выбор лучшего поставщика для данного товара",
+		},
+	); err != nil {
+		return fmt.Errorf("add rank discussion: %v", err)
+	}
+
+	return nil
 }
 
 func clToModels(pr *product.Product) *models.Product {

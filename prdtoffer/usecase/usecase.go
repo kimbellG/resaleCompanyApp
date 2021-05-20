@@ -7,17 +7,23 @@ import (
 	"fmt"
 )
 
-type ProductOfferUseCase struct {
-	rep  prdtoffer.Repository
-	prov prdtoffer.IdController
-	prod prdtoffer.IdController
+type ProvChoice interface {
+	AddAlternative(ctx context.Context, problemName string, alternative *models.AlternativeInput) error
 }
 
-func NewProductOfferUseCase(repo prdtoffer.Repository, provider prdtoffer.IdController, product prdtoffer.IdController) *ProductOfferUseCase {
+type ProductOfferUseCase struct {
+	rep        prdtoffer.Repository
+	prov       prdtoffer.IdController
+	prod       prdtoffer.IdController
+	rankChoice ProvChoice
+}
+
+func NewProductOfferUseCase(repo prdtoffer.Repository, provider prdtoffer.IdController, product prdtoffer.IdController, rankChoice ProvChoice) *ProductOfferUseCase {
 	return &ProductOfferUseCase{
-		rep:  repo,
-		prov: provider,
-		prod: product,
+		rep:        repo,
+		prov:       provider,
+		prod:       product,
+		rankChoice: rankChoice,
 	}
 }
 
@@ -34,6 +40,12 @@ func (o *ProductOfferUseCase) Add(ctx context.Context, pr *prdtoffer.Offer) erro
 
 	if err := o.rep.Add(ctx, newOffer); err != nil {
 		return err
+	}
+
+	if err := o.rankChoice.AddAlternative(ctx, pr.ProductName, &models.AlternativeInput{
+		Name: pr.ProviderName,
+	}); err != nil {
+		return fmt.Errorf("add alternative: %v", err)
 	}
 
 	return nil

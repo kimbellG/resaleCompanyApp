@@ -77,6 +77,37 @@ func markReqToModel(req *MarkRequest) *models.AlternativeMarkInput {
 	}
 }
 
+type MarkRequestWithNames struct {
+	ProblemName     string  `json:"problem_name"`
+	AlternativeName string  `json:"alternative_name"`
+	ExpertLogin     string  `json:"expert_login"`
+	Mark            float32 `json:"mark"`
+}
+
+func (h *Handler) POSTMarkByName(w http.ResponseWriter, r *http.Request) {
+	req := &MarkRequestWithNames{}
+	if err := decodingJSONFromRequest(r, req); err != nil {
+		h.RankLogger.Debugf("put marks: decoding json: %v", err)
+		http.Error(w, "incorrcet JSON request", http.StatusBadRequest)
+		return
+	}
+
+	if err := h.useCase.AddMarkByNames(r.Context(), markReqNamesToUseCase(req)); err != nil {
+		h.RankLogger.Debugf("put mark: usecase add mark: %v", err)
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+}
+
+func markReqNamesToUseCase(req *MarkRequestWithNames) *rang.AlternativeMarkInput {
+	return &rang.AlternativeMarkInput{
+		ProblemName:     req.ProblemName,
+		AlternativeName: req.AlternativeName,
+		ExpertLogin:     req.ExpertLogin,
+		Mark:            req.Mark,
+	}
+}
+
 func (h *Handler) Gets(w http.ResponseWriter, r *http.Request) {
 	result, err := h.useCase.Gets(r.Context())
 	if err != nil {

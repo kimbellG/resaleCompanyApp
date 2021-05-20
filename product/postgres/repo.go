@@ -11,7 +11,8 @@ import (
 )
 
 type ProductRepository struct {
-	db *sql.DB
+	db         *sql.DB
+	productAdd *dbutil.AddController
 }
 
 func NewProductRepository(lib_db *sql.DB) *ProductRepository {
@@ -27,7 +28,8 @@ func NewProductRepository(lib_db *sql.DB) *ProductRepository {
 	}
 
 	return &ProductRepository{
-		db: lib_db,
+		db:         lib_db,
+		productAdd: dbutil.NewAddController(lib_db, "Product"),
 	}
 }
 

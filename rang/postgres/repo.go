@@ -11,14 +11,15 @@ import (
 )
 
 type RangPostgres struct {
-	db *sql.DB
+	db             *sql.DB
+	alternativeAdd *dbutil.AddController
 }
 
 func NewRangPostgres(lib_db *sql.DB) *RangPostgres {
 	err := dbutil.Create(lib_db,
 		`CREATE TABLE IF NOT EXISTS Problems (
 		id SERIAL PRIMARY KEY,
-		name VARCHAR(100),
+		name VARCHAR(100) UNIQUE,
 		description VARCHAR(1000)
 	);`)
 
@@ -29,7 +30,7 @@ func NewRangPostgres(lib_db *sql.DB) *RangPostgres {
 	err = dbutil.Create(lib_db,
 		`CREATE TABLE IF NOT EXISTS Alternatives (
 			id SERIAL PRIMARY KEY,
-			problemId INT REFERENCES Problems(id),
+			problemId INT REFERENCES Problems(id) ON DELETE CASCADE,
 			name VARCHAR(100),
 			description VARCHAR(1000),
 			weight DOUBLE PRECISION DEFAULT 0
@@ -42,9 +43,9 @@ func NewRangPostgres(lib_db *sql.DB) *RangPostgres {
 	err = dbutil.Create(lib_db,
 		`CREATE TABLE IF NOT EXISTS Marks (
 			id SERIAL PRIMARY KEY,
-			problemId INT REFERENCES Problems (id),
-			alternativeId INT REFERENCES Alternatives (id),
-			expertID INT REFERENCES userInformation(id),
+			problemId INT REFERENCES Problems (id) ON DELETE CASCADE,
+			alternativeId INT REFERENCES Alternatives (id) ON DELETE CASCADE,
+			expertID INT REFERENCES userInformation(id) ON DELETE CASCADE,
 			mark DOUBLE PRECISION DEFAULT 0,
 			weight DOUBLE PRECISION DEFAULT 0
 		);`)
@@ -59,7 +60,8 @@ func NewRangPostgres(lib_db *sql.DB) *RangPostgres {
 	}
 
 	return &RangPostgres{
-		db: lib_db,
+		db:             lib_db,
+		alternativeAdd: dbutil.NewAddController(lib_db, "Alternatives"),
 	}
 }
 
@@ -129,6 +131,14 @@ func (r *RangPostgres) insertMarks(problemId int, alternative *models.Alternativ
 			problemId, alternative.Id, key, value, weight); err != nil {
 			return err
 		}
+	}
+
+	return nil
+}
+
+func (r *RangPostgres) AddAlternative(ctx context.Context, problemId int, alternative *models.AlternativeInput) error {
+	if err := r.alternativeAdd.Add("name, problemId, description", alternative.Name, problemId, alternative.Description); err != nil {
+		return fmt.Errorf("add alternative: %v", err)
 	}
 
 	return nil

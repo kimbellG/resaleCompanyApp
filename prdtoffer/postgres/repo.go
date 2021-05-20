@@ -18,8 +18,8 @@ func NewOfferRepository(lib_db *sql.DB) *OfferRepository {
 	err := dbutil.Create(lib_db,
 		`CREATE TABLE IF NOT EXISTS Offer (
 			id SERIAL PRIMARY KEY UNIQUE,
-			productId INT REFERENCES Product (id),
-			providerId INT REFERENCES Provider (vendor_code),
+			productId INT REFERENCES Product (id) ON DELETE CASCADE,
+			providerId INT REFERENCES Provider (vendor_code) ON DELETE CASCADE,
 			cost DOUBLE PRECISION
 		);`)
 

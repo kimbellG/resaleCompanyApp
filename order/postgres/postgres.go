@@ -32,8 +32,8 @@ func NewOrderRepository(lib_db *sql.DB) *OrderRepository {
 	err = dbutil.Create(lib_db,
 		`CREATE TABLE IF NOT EXISTS Purchases (
 		id SERIAL PRIMARY KEY,
-		orderID INT REFERENCES ProductOrder (id),
-		offerID INT REFERENCES Offer (id)
+		orderID INT REFERENCES ProductOrder (id) ON DELETE CASCADE,
+		offerID INT REFERENCES Offer (id) ON DELETE CASCADE
 	);`)
 
 	if err != nil {
