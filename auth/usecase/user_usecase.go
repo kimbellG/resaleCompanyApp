@@ -35,14 +35,14 @@ func (a *AuthUseCase) SignUp(ctx context.Context, username, password, name strin
 	return a.userRepo.CreateUser(ctx, new_user)
 }
 
-func (a *AuthUseCase) SignIn(ctx context.Context, username, password string) (string, error) {
+func (a *AuthUseCase) SignIn(ctx context.Context, username, password string) (*auth.SignAnswer, error) {
 	user, err := a.userRepo.GetUser(ctx, username, password)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	if !user.Status {
-		return "", errors.New("Profile isn't activate")
+		return nil, errors.New("profile isn't activate")
 	}
 
 	return a.GenerateToken(user), nil
@@ -56,7 +56,7 @@ func NewTokenInfo(user *models.User) *models.TokenInfo {
 	}
 }
 
-func (a *AuthUseCase) GenerateToken(user *models.User) string {
+func (a *AuthUseCase) GenerateToken(user *models.User) *auth.SignAnswer {
 	tk := NewTokenInfo(user)
 	token := jwt.NewWithClaims(jwt.GetSigningMethod("HS256"), tk)
 	tokenString, err := token.SignedString(a.tokenKey)
@@ -66,5 +66,5 @@ func (a *AuthUseCase) GenerateToken(user *models.User) string {
 			fmt.Sprintf("invalid procces of creating token: %v", err))
 	}
 
-	return tokenString
+	return &auth.SignAnswer{tokenString, user.Access}
 }

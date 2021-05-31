@@ -5,9 +5,14 @@ import (
 	"cw/models"
 )
 
+type SignAnswer struct {
+	Token  string
+	Access string
+}
+
 type UseCase interface {
 	SignUp(ctx context.Context, username, password, name string) error
-	SignIn(ctx context.Context, username, password string) (string, error)
+	SignIn(ctx context.Context, username, password string) (*SignAnswer, error)
 }
 
 type AdminUseCase interface {

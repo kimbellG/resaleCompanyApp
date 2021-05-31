@@ -108,7 +108,7 @@ var LogNewConnection = func(next http.Handler) http.Handler {
 		if !isPublicPath(r.URL.Path) {
 			acs := r.Context().Value(accessProfile)
 			usr := r.Context().Value(UserInfo)
-			log.Printf("Connection user: %v:%v", usr, acs)
+			log.Printf("Connection user: %v:%v, Request: %v", usr, acs, r.URL.Path)
 			next.ServeHTTP(w, r)
 		} else {
 			next.ServeHTTP(w, r)

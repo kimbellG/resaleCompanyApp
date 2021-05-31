@@ -12,7 +12,7 @@ import (
 
 type ProductRepository struct {
 	db         *sql.DB
-	productAdd *dbutil.AddController
+	productAdd *dbutil.DBController
 }
 
 func NewProductRepository(lib_db *sql.DB) *ProductRepository {

@@ -12,7 +12,7 @@ import (
 
 type RangPostgres struct {
 	db             *sql.DB
-	alternativeAdd *dbutil.AddController
+	alternativeAdd *dbutil.DBController
 }
 
 func NewRangPostgres(lib_db *sql.DB) *RangPostgres {

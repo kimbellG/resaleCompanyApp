@@ -1,9 +1,14 @@
 package postgres
 
 import (
+	"bytes"
 	"context"
+	"crypto/sha256"
+	"cw/dbutil"
+	"cw/dbutil/condition"
 	"cw/logger"
 	"cw/models"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
@@ -42,6 +47,15 @@ func PostgresToModels(user *User) *models.User {
 	}
 }
 
+const (
+	id_a       = "id"
+	login_a    = "login"
+	password_a = "password"
+	status_a   = "status"
+	access_a   = "access"
+	name_a     = "name"
+)
+
 type UserRepository struct {
 	db *sql.DB
 }
@@ -63,6 +77,10 @@ func NewUserRepository(db *sql.DB) *UserRepository {
 		os.Exit(1)
 	}
 
+	if err := createFirstAdmin(db); err != nil {
+		panic(fmt.Errorf("create first admin: %v", err))
+	}
+
 	return &UserRepository{
 		db: db,
 	}
@@ -80,6 +98,60 @@ func createTable(db *sql.DB, query string) error {
 	}
 
 	return nil
+}
+
+func createFirstAdmin(db *sql.DB) error {
+	usersDb := dbutil.NewAddController(db, "userInformation")
+
+	password := createFirstAdminPassword()
+	if isNotAdminExists(usersDb) {
+		if err := usersDb.Add("login, password, status, access, name", "admin", password, true, "admin", "admin"); err != nil {
+			return fmt.Errorf("add first admin: %v", err)
+		}
+	}
+
+	return nil
+}
+
+func createFirstAdminPassword() string {
+	sha := sha256.Sum256([]byte("test"))
+	result := ""
+
+	jsonPassword := bytes.NewBuffer([]byte{})
+
+	if err := json.NewEncoder(jsonPassword).Encode(string(sha[:])); err != nil {
+		panic(err)
+	}
+
+	if err := json.NewDecoder(jsonPassword).Decode(&result); err != nil {
+		panic(err)
+	}
+
+	return result
+}
+
+func isNotAdminExists(db *dbutil.DBController) bool {
+
+	cond := condition.NewCondition()
+	cond.AddCondition(condition.NOTHING, "access", condition.EQ)
+
+	rows, err := db.Select("login", cond, "admin")
+	if err != nil {
+		panic(err)
+	}
+
+	test := &models.User{}
+	for rows.Next() {
+		if err := rows.Scan(&test.Login); err != nil {
+			panic(err)
+		}
+	}
+
+	if test.Login == "" {
+		return true
+	} else {
+		return false
+	}
 }
 
 func (r *UserRepository) CreateUser(ctx context.Context, user *models.User) error {
@@ -108,7 +180,7 @@ func (r *UserRepository) addAuthRecord(user *User) error {
 func (r *UserRepository) GetUser(ctx context.Context, username, password string) (*models.User, error) {
 	dbUser := r.requestUserToDB(username, password)
 	if dbUser.Login == "" {
-		return nil, errors.New("Authorization failed. User doesn't exist.")
+		return nil, errors.New("authorization failed: user doesn't exist")
 	}
 
 	return PostgresToModels(dbUser), nil
@@ -123,7 +195,8 @@ func (r *UserRepository) requestUserToDB(username, password string) *User {
 		logger.AssertMessage(fields, fmt.Sprintf("stmt is invalid: %v", err))
 	}
 
-	userAuthInfo, err := stmt.Query(username, password)
+	pass := []byte(password)
+	userAuthInfo, err := stmt.Query(username, pass)
 	if err != nil {
 		logger.AssertMessage(fields, fmt.Sprintf("query is invalid: %v", err))
 	}

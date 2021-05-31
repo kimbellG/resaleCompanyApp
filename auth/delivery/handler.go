@@ -5,15 +5,23 @@ import (
 	"cw/logger"
 	"encoding/json"
 	"net/http"
+
+	"github.com/sirupsen/logrus"
 )
 
 type Handler struct {
-	useCase auth.UseCase
+	UserUseCase  auth.UseCase
+	AdminUseCase auth.AdminUseCase
+	logg         *logrus.Entry
 }
 
-func NewHandler(cases auth.UseCase) *Handler {
+func NewHandler(userCases auth.UseCase, adminCases auth.AdminUseCase) *Handler {
 	return &Handler{
-		useCase: cases,
+		UserUseCase:  userCases,
+		AdminUseCase: adminCases,
+		logg: logger.NewLoggerWithFields(
+			map[string]interface{}{"action": "user control"},
+		),
 	}
 }
 
@@ -29,7 +37,8 @@ type SignInInput struct {
 }
 
 type TokenType struct {
-	Token string
+	Token  string `json:"token"`
+	Access string `json:"access"`
 }
 
 func (h *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
@@ -44,7 +53,7 @@ func (h *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := h.useCase.SignUp(r.Context(), newUser.Login, newUser.Password, newUser.Name); err != nil {
+	if err := h.UserUseCase.SignUp(r.Context(), newUser.Login, newUser.Password, newUser.Name); err != nil {
 		upLogger.Errorf("invalid sign up in usecase: %v", err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -73,14 +82,14 @@ func (h *Handler) SignIn(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token, err := h.useCase.SignIn(r.Context(), userSignIn.Login, userSignIn.Password)
+	token, err := h.UserUseCase.SignIn(r.Context(), userSignIn.Login, userSignIn.Password)
 	if err != nil {
 		inLogger.Debugf("sign in is failed: %v", err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	SendToken(w, token)
+	SendToken(w, token.Token, token.Access)
 }
 
 func decodingAnswerForSignIn(r *http.Request) (*SignInInput, error) {
@@ -93,8 +102,8 @@ func decodingAnswerForSignIn(r *http.Request) (*SignInInput, error) {
 	return result, nil
 }
 
-func SendToken(w http.ResponseWriter, token string) {
-	tokenResult := &TokenType{Token: token}
+func SendToken(w http.ResponseWriter, token, access string) {
+	tokenResult := &TokenType{Token: token, Access: access}
 
 	if err := json.NewEncoder(w).Encode(tokenResult); err != nil {
 		panic("Incorrect token encoding")

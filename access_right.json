@@ -51,7 +51,8 @@
         "/order/get",
         "/order/get/interval",
         "/order/update/status",
-        "/order/filter"
+        "/order/filter",
+        "/rank/get"
     ],
     "manager": [
        "/provider/add",
@@ -108,5 +109,41 @@
         "/rank/add/mark",
         "/rank/get",
         "/rank/get_by_id"
+    ],
+    "admin": [
+        "/provider/add",
+        "/provider/get",
+        "/provider/update",
+        "/provider/delete",
+        "/client/add",
+        "/client/get",
+        "/client/update",
+        "/client/delete",
+        "/client/filter",
+        "/product/add",
+        "/product/get",
+        "/product/update",
+        "/product/delete",
+        "/product/filter",
+        "/offer/add",
+        "/offer/get",
+        "/offer/update",
+        "/offer/delete",
+        "/order/add",
+        "/order/get",
+        "/order/get/interval",
+        "/order/update/status",
+        "/order/filter",
+        "/rank/add/problem",
+        "/rank/add/mark",
+        "/rank/get",
+        "/rank/get_by_id",
+        "/user-control/confirm",
+        "/user-control/disable",
+        "/user-control/get/all",
+        "/user-control/get/by/login",
+        "/user-control/update",
+        "/user-control/delete"
+
     ]
 }

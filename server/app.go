@@ -52,6 +52,7 @@ import (
 
 type App struct {
 	authController auth.UseCase
+	admin          auth.AdminUseCase
 	provider       provider.UseCase
 	clt            client.UseCase
 	prd            product.UseCase
@@ -64,6 +65,7 @@ func NewApp() *App {
 	db := initDB()
 
 	userRepo := postgres.NewUserRepository(db)
+	adminRepo := postgres.NewAdminRepo(db)
 	providerRepo := prv_rep.NewProviderRepository(db)
 	cltRepo := client_rep.NewClientRepository(db)
 	prdRepo := prdrep.NewProductRepository(db)
@@ -81,6 +83,7 @@ func NewApp() *App {
 		offer:    offercase.NewProductOfferUseCase(offerRepo, providerRepo, prdRepo, rangcase.NewRangUseCase(rankRepo, userRepo)),
 		ord:      ordercase.NewOrderUseCase(orderRepo, client_usecase.NewClientUseCase(cltRepo), offercase.NewProductOfferUseCase(offerRepo, providerRepo, prdRepo, rangcase.NewRangUseCase(rankRepo, userRepo)), userRepo),
 		rank:     rangcase.NewRangUseCase(rankRepo, userRepo),
+		admin:    usecase.NewAdminUseCase(adminRepo),
 	}
 }
 
@@ -100,7 +103,7 @@ func initDB() *sql.DB {
 func (a *App) Run(port string) {
 	router := mux.NewRouter()
 
-	auth_delivery.RegisterEndpoints(router, a.authController)
+	auth_delivery.RegisterEndpoints(router, a.authController, a.admin)
 	provider_dlvr.RegisterEndpoints(router, a.provider)
 	client_dlvr.RegisterEndpoints(router, a.clt)
 	prddlvr.RegisterEndpoints(router, a.prd)
